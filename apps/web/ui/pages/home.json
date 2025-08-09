@@ -1,0 +1,68 @@
+{
+  "card": {
+    "log_id": "home",
+    "states": [
+      {
+        "state_id": 0,
+        "div": {
+          "type": "container",
+          "orientation": "vertical",
+          "width": { "type": "match_parent" },
+          "paddings": { "top": 16, "bottom": 24 },
+          "alignment_horizontal": "center",
+          "items": [
+            {
+              "type": "container",
+              "orientation": "vertical",
+              "width": { "type": "fixed", "value": 375 },
+              "height": { "type": "wrap_content" },
+              "items": [
+                { "$include": "/components/header.json" },
+
+                {
+                  "type": "text",
+                  "text": "Урок ещё не готов",
+                  "width": { "type": "match_parent" },
+                  "paddings": { "top": 24, "left": 16, "right": 16, "bottom": 8 },
+                  "font_size": 28
+                },
+
+                {
+                  "type": "container",
+                  "width": { "type": "match_parent" },
+                  "paddings": { "top": 8, "left": 16, "right": 16 },
+                  "items": [
+                    {
+                      "type": "container",
+                      "width": { "type": "match_parent" },
+                      "height": { "type": "fixed", "value": 44 },
+                      "background": [{ "type": "solid", "color": "#1a73e8" }],
+                      "border": { "corner_radius": 12 },
+                      "items": [
+                        {
+                          "type": "text",
+                          "text": "Начать",
+                          "width": { "type": "match_parent" },
+                          "height": { "type": "match_parent" },
+                          "text_alignment_horizontal": "center",
+                          "text_alignment_vertical": "center",
+                          "text_color": "#FFFFFF",
+                          "font_size": 16
+                        }
+                      ],
+                      "action": {
+                        "log_id": "start_clicked",
+                        "url": "#open_lesson",
+                        "payload": { "lesson_id": "1" }
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      }
+    ]
+  }
+}
