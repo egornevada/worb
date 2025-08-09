@@ -1,0 +1,28 @@
+{
+  "type": "container",
+  "orientation": "vertical",
+  "width": { "type": "wrap_content" },
+  "height": { "type": "wrap_content" },
+  "items": [
+    {
+      "type": "text",
+      "text": "❤️",
+      "font_size": 18,
+      "text_color": "#B0B0B0",
+      "height": { "type": "wrap_content" },
+      "width": { "type": "wrap_content" },
+      "alignment_horizontal": "center"
+    },
+    {
+      "type": "text",
+      "text": "0",
+      "font_size": 12,
+      "text_color": "#9E9E9E",
+      "height": { "type": "wrap_content" },
+      "width": { "type": "wrap_content" },
+      "margins": { "top": 4 },
+      "alignment_horizontal": "center"
+    }
+  ],
+  "margins": { "right": 16 }
+}

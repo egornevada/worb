@@ -2,6 +2,52 @@ from pathlib import Path
 import json
 from flask import Flask, request, send_from_directory
 
+# ---- Server-side includes: allow {"$include": "relative/path.json"} inside UI JSON files ----
+def _safe_join_ui(path_str: str) -> Path:
+    """
+    Join a UI-relative path (optionally starting with '/' or '\\') against UI_DIR
+    and ensure it stays inside the UI root.
+    """
+    # Normalize possible absolute-like includes ("/components/..." or "\\components\\...")
+    rel = str(path_str).lstrip("/\\")
+
+    p = (UI_DIR / rel).resolve()
+
+    # Guard: the resolved path must remain inside UI_DIR
+    if UI_DIR not in p.parents and p != UI_DIR:
+        raise ValueError(f"Include outside UI dir: {p}")
+
+    # Friendlier error if file missing
+    if not p.exists():
+        raise FileNotFoundError(f"Included file not found: {rel}")
+
+    return p
+
+def resolve_includes(node, _stack=()):
+    """
+    Recursively resolves {"$include": "<relpath>"} nodes by replacing them with the
+    JSON loaded from apps/web/ui/<relpath>. Guards against cycles.
+    """
+    # Handle include node itself
+    if isinstance(node, dict) and "$include" in node:
+        include_path = _safe_join_ui(node["$include"])
+        if include_path in _stack:
+            raise ValueError(f"Cyclic include: {include_path}")
+        with open(include_path, "r", encoding="utf-8") as f:
+            included = json.load(f)
+        return resolve_includes(included, _stack + (include_path,))
+
+    # Dive into dicts
+    if isinstance(node, dict):
+        return {k: resolve_includes(v, _stack) for k, v in node.items()}
+
+    # Dive into lists
+    if isinstance(node, list):
+        return [resolve_includes(v, _stack) for v in node]
+
+    # Primitives stay as-is
+    return node
+
 # Paths
 APP_FILE = Path(__file__).resolve()
 WEB_DIR = APP_FILE.parent.parent / "web"
@@ -72,6 +118,9 @@ def get_lesson(lesson_id: int):
         root_items.insert(0, header_block)
     except Exception as e:
         print("[WARN] header.json not injected:", e)
+
+    # Resolve any {"$include": "..."} found in the card JSON (enables nested components)
+    card = resolve_includes(card)
 
     return card
 

@@ -2,21 +2,40 @@
   "type": "container",
   "width": { "type": "match_parent" },
   "height": { "type": "fixed", "value": 64 },
+  "paddings": { "top": 12, "right": 12, "bottom": 12, "left": 12 },
+  "background": [ { "type": "solid", "color": "#FFFFFF" } ],
+  "border": { "corner_radius": 16 },
+  "orientation": "overlap",
   "items": [
     {
-      "type": "text",
-      "text": "Это текст из хеадер.жисон",
+      "type": "container",
+      "orientation": "horizontal",
       "width": { "type": "match_parent" },
-      "height": { "type": "wrap_content" },
-      "alignment_horizontal": "center",
-      "alignment_vertical": "center",
+      "height": { "type": "match_parent" },
+      "items": [
+        {
+          "type": "container",
+          "orientation": "horizontal",
+          "items": [
+            { "$include": "/components/days_widget.json" },
+            { "$include": "/components/hearts_widget.json" }
+          ]
+        },
+        { "type": "container", "width": { "type": "match_parent" } },
+        { "$include": "/components/theme_toggle.json" }
+      ]
+    },
+    {
+      "type": "text",
+      "text": "worb",
+      "font_size": 18,
+      "font_weight": "medium",
+      "text_color": "#3A3A3A",
+      "width": { "type": "match_parent" },
+      "height": { "type": "match_parent" },
       "text_alignment_horizontal": "center",
-      "font_size": 16
+      "alignment_horizontal": "center",
+      "alignment_vertical": "center"
     }
-  ],
-  "alignment_vertical": "top",
-  "paddings": { "top": 16, "right": 16, "bottom": 16, "left": 16 },
-  "orientation": "horizontal",
-  "background": [ { "type": "solid", "color": "#f5f5f5" } ],
-  "border": { "corner_radius": 16 }
+  ]
 }

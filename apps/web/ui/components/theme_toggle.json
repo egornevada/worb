@@ -1,0 +1,22 @@
+{
+  "type": "container",
+  "width": { "type": "fixed", "value": 44 },
+  "height": { "type": "fixed", "value": 44 },
+  "paddings": { "left": 10, "right": 10, "top": 10, "bottom": 10 },
+  "background": [ { "type": "solid", "color": "#F3F3F3" } ],
+  "border": { "corner_radius": 14 },
+  "items": [
+    {
+      "type": "text",
+      "text": "🌙",
+      "font_size": 18,
+      "alignment_horizontal": "center",
+      "alignment_vertical": "center",
+      "width": { "type": "match_parent" },
+      "height": { "type": "match_parent" }
+    }
+  ],
+  "action": {
+    "log_id": "toggle_theme"
+  }
+}
