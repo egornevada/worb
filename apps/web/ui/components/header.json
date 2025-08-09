@@ -1,0 +1,22 @@
+{
+  "type": "container",
+  "width": { "type": "match_parent" },
+  "height": { "type": "fixed", "value": 64 },
+  "items": [
+    {
+      "type": "text",
+      "text": "Это текст из хеадер.жисон",
+      "width": { "type": "match_parent" },
+      "height": { "type": "wrap_content" },
+      "alignment_horizontal": "center",
+      "alignment_vertical": "center",
+      "text_alignment_horizontal": "center",
+      "font_size": 16
+    }
+  ],
+  "alignment_vertical": "top",
+  "paddings": { "top": 16, "right": 16, "bottom": 16, "left": 16 },
+  "orientation": "horizontal",
+  "background": [ { "type": "solid", "color": "#f5f5f5" } ],
+  "border": { "corner_radius": 16 }
+}
