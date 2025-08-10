@@ -26,11 +26,38 @@
                 },
 
                 {
-                  "type": "text",
-                  "text": "Урок ещё не готов",
-                  "width": { "type": "match_parent" },
-                  "paddings": { "top": 24, "left": 16, "right": 16, "bottom": 8 },
-                  "font_size": 28
+                  "type": "container",
+                  "width": {
+                    "type": "match_parent"
+                  },
+                  "height": {
+                    "type": "fixed",
+                    "value": 184
+                  },
+                  "alignment_horizontal": "center",
+                  "alignment_vertical": "center",
+                  "items": [
+                    {
+                      "type": "text",
+                      "text": "Сегодня, вы еще не учили слова",
+                      "width": {
+                        "type": "match_parent"
+                      },
+                      "text_alignment_horizontal": "center",
+                      "text_color": "#424242",
+                      "font_size": 32,
+                      "line_height": 32,
+                      "font_weight": "medium"
+                    }
+                  ],
+                  "content_alignment_horizontal": "center",
+                  "content_alignment_vertical": "bottom",
+                  "paddings": {
+                    "top": 8,
+                    "right": 8,
+                    "bottom": 8,
+                    "left": 8
+                  }
                 },
 
                 {
@@ -63,7 +90,27 @@
                       }
                     }
                   ]
+                },
+                {
+                  "type": "container",
+                  "width": { "type": "match_parent" },
+                  "height": { "type": "wrap_content" },
+                  "items": [
+                    { "$include": "/components/tst-level-true.json" },
+                    { "$include": "/components/tst-level-false.json" },
+                    { "$include": "/components/tst-level-false.json" },
+                    { "$include": "/components/tst-level-false.json" },
+                    { "$include": "/components/tst-level-false.json" }
+                    ],
+                  "paddings": {
+                    "top": 8,
+                    "right": 8,
+                    "bottom": 8,
+                    "left": 8
+                  }
+            
                 }
+                
               ]
             }
           ]

@@ -44,6 +44,6 @@
     });
   } catch (e) {
     console.error('Load error:', e);
-    root.textContent = 'Не удалось загрузить JSON /lesson/1 — см. консоль';
+    root.textContent = 'чето не так, смотри консоль';
   }
 })();

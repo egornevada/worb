@@ -1,0 +1,213 @@
+{
+                      "type": "container",
+                      "width": {
+                        "type": "match_parent"
+                      },
+                      "height": {
+                        "type": "wrap_content"
+                      },
+                      "alignment_horizontal": "center",
+                      "alignment_vertical": "center",
+                      "paddings": {
+                        "top": 12,
+                        "right": 12,
+                        "bottom": 12,
+                        "left": 12
+                      },
+                      "background": [
+                        {
+                          "type": "solid",
+                          "color": "#dbdbdb"
+                        }
+                      ],
+                      "border": {
+                        "corner_radius": 16
+                      },
+                      "items": [
+                        {
+                          "type": "container",
+                          "width": {
+                            "type": "match_parent"
+                          },
+                          "height": {
+                            "type": "wrap_content"
+                          },
+                          "alignment_horizontal": "center",
+                          "alignment_vertical": "center",
+                          "orientation": "horizontal",
+                          "content_alignment_horizontal": "left",
+                          "content_alignment_vertical": "center",
+                          "margins": {
+                            "bottom": 12
+                          },
+                          "items": [
+                            {
+                              "type": "image",
+                              "image_url": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFAAAABQCAYAAACOEfKtAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAU4SURBVHgB7ZxbTttMFMdPQkA8pjsIKyhdwZc+Im4fKyhdQWEFDSugXUHpCkJAiMfSFbRdQd0V1I9I3Po/lS2hNDNzxj4zvsQ/yXKEx4n954znXGZM1NHR0dHR0VENPaoR0+l0uL6+Pry/vx89PT0N8SfeqNfrJbzv9/vp9vb2d6oRlQp4eXk5hlCb+Pgf7yHUSHIe2n5nUbH/AVFvdnd3b6gioguYifYGH/+nzMIUSCHk+ePj42xvb++cIhJFQO6ag8HgHYQ7Ij3RTCTYTlZXV2+2trYSCkxQASMLN0+Cbn6G3/8cUshgAl5cXBxid0rxhZsnwXaCrn1GAVAXEFY3WllZ+YSPY6oReEae4bpOtK1RVcBsgJhS9VZnIsF2rDnQ9EkJiPce4n2h+orHjLBN+VpJCRULzMSbUIPAADOB/3hCJSktYBPFy9EQsZSATRYvp6yIhQVsg3g5ZUQsJCB8PA7DptQiIOLrIjG1t4Ds58Gn+iIN/BtEivDvla+f6O3GwBl930LxmOHd3d0nz3P8BMzCs0NqL+PsHsWIu3CLu+486cPDw8bBwUEqaSy2QGQ13iyBeMwQhnIkbSyywCWyvhyxFYosEAPHeInEY8RWKBIQDrNa8N0UYDDvJO2cAnKKKpT14R+TUDlShe8wMeR7dzVyCpgVgLRJ8Fh4tb+/v8HPGvyGdxiFcz7yuc++IyFlYDjOe3cOIvCLfpNyjg8e/8a8xz+bzSa4YNGjggWHcJPnf7u6utqEkN9IlxTJ1xe2BlYLzExYO0GaLAqXWBCJJS4Sj+GCewArdHZjq4Cos45JnxFX6xYdcIloEo9hVyvEszor/BuxCoih/CUFgONp0zGTiDbxGHb0KQD43bHtuGsQGVEYjmx1iXkRXeKFzE3Cqq1GZB1EMIA8UUBciUweWHhflXg5GJxemKISo4CBRrV/L6BENjhWVnyR15Bj7MIYQKKUJ1mAImXGmCUFnm5nOqZWFy6Dr4ix6zHZXMWF9C0njSgiUhErKmb5C1gFeGz0NNrExCagKCOrhctVyZFGLJrkU4wX0becFE1AqXg5VYhowiggRp6EIuArXk5MEaGF0Zgq7cKSCMMnYgkFnGjjyoC+5aSQyUpxeOYanUOLyCsCbMddyYQgazJ8Y1uhiB8pDL9sB60C4qK+UgDW1tbOTMdMfp5LRLg3EwpDcQvESBzCAhNTXOlykm0ihnrk8EIe2/FKUvpcD5lfsuUTYSxKQGST23+SLuVS+gxuakbKIMszvb6+HvFnzk7jn3TqE57llph/B2eOuPBPyvDqJ1cbpwVmM+/VL47hLlc2Da/xHSYkcwZFcWWIbtwAEnTfDVcj6cyEUC5CnRH5liIB4SJ8oMjJhYpJeLGipKFIwMxFWBorxL2KFyiK84FLZIWJzdGfRyxgVpU6pvbjtSDRO7uLEZldmjG1EF7RubOz89brHPIETjD/QBu7Ms8Y887qeAuIrsyO6wG1j+Mia4kLFZXYO69LSl0Dvpeia4hLVbh85vTVlaIlhZzSJcImi1hWPEalxtpEETXEY9SK1E0SUUs8RrXKz8tgcXGnNV5TkrIHofmqKNWpHTySIeR7zbEk1Y8bXs6q/Z6toC/e4QU6NbDGvyFoY1688xxO12dLpqpYqPg3g8RJEOnKyyLEevkYF3zGkSwyinA5lbz+Djd3CCH3SfH1d9jO8Z2fY79LsNK5dpmYvBbvJU/oxH5Tcl5WSOKy6FfeL9ULGF1wiTKfn/1sliy7H+lgMEhub2/TGF2zo6Ojo6Ojo+78ASxaMsr05I37AAAAAElFTkSuQmCC",
+                              "width": {
+                                "type": "fixed",
+                                "value": 20
+                              },
+                              "height": {
+                                "type": "fixed",
+                                "value": 20
+                              },
+                              "preload_required": true,
+                              "alignment_horizontal": "center",
+                              "alignment_vertical": "center",
+                              "margins": {
+                                "right": 8
+                              }
+                            },
+                            {
+                              "type": "text",
+                              "text": "Пока недоступно",
+                              "width": {
+                                "type": "match_parent"
+                              },
+                              "font_size": 20,
+                              "line_height": 24,
+                              "font_weight": "medium",
+                              "text_color": "#b3b3b3"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "container",
+                          "width": {
+                            "type": "match_parent"
+                          },
+                          "height": {
+                            "type": "wrap_content"
+                          },
+                          "alignment_horizontal": "center",
+                          "alignment_vertical": "center",
+                          "orientation": "horizontal",
+                          "items": [
+                            {
+                              "type": "container",
+                              "width": {
+                                "type": "match_parent"
+                              },
+                              "height": {
+                                "type": "wrap_content"
+                              },
+                              "alignment_horizontal": "center",
+                              "alignment_vertical": "center",
+                              "content_alignment_horizontal": "center",
+                              "content_alignment_vertical": "center",
+                              "items": [
+                                {
+                                  "type": "image",
+                                  "image_url": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABgCAYAAADimHc4AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAATsSURBVHgB7Z3dUdtAEMcXY3h2KohSQZIK4jzygD8qSFIBUAFQgaECSAXGpgDcAaSDo4L4mQ+T/8JpJiHA7Z100tna34wGTbLg8f51u6vTaY9IURRFURRFUZSmsUYJMx6PO+vr612cZjg+8s+Hhwc+p7W1teyZ+Rz/Z/Dvc5wbnF+3Wq3Z3d3d1XA4nFOiJCUAO7zdbn+C8/o4Bi84ORTDYiwWi8n9/f0sJUGSEOD8/LwLh+/gtIujQ5GBGKf4vJ/b29szqpnaBLBX+w4csUsVOP0VDI5DjIqzukZF5QIk4vjncO44xYg4pIqpVIDpdDqA40clxvayMTgOe73eKVVEJQLgqs9QzZzQU4xfBs42Njb2tra2DEWmRZFBgt2B8y9peZzPDG5vby8xYr9TZKKNAFvD7+N0l5abI4SkPYpEFAE45KDUGyPWf6IVAHnranNzcxgjJJUugHX+RcKJNhSDvPC1bBFKFWCFnZ9TugilCdAA5+eUKkIpAjTI+TmliVBKGWoTbkbNIbu5uRlzpUcFKSwAauXRqlQ7PvB3tmV2sb9DBbA3KifUbPZwn3BEgQQLYKcX+A43lQm1upgjH3wOzQfBIQjOH5E6n+lg2iI4CgQJYEPPgJScLs/0UgBBAuDWvHDyWUFGIVWRtwCY3dxvWMkphe+FvCcevZIwK4wPuVQBXmWOx5sffB5veo0AJN6BOv9NOr6jwEsAjf1ucIHu+NiLBeClI3r1i+iwr6TGYgFw9X8jRYRd4yRClITt48XfpEgRJ2PRCLDrMxU5j0ssJYbSENQnxYvFYiG6MxYJgJjWJcULFCyii9aZAzT+h4M88M6VB5wjQBrLlP+R5E6nAIhlXVJCyVwGkhyQkRIEpiU+Om1cBkgm70kJAtEjc9lIBNCnXuFkLgOnAPlLcUocJDlAR0A4mcsg+vsBytuoADWjAtSMJAkbUkIpZzpaCUNy8UruAwwpQdi+FW8iCUHXpASBqQjjtHEZQMUrUoLAdLTz4pXkAENKENyhxWnjMuD2LqQEwb2KXDZOAfiJjpaiQZjSVkWACSleSMLPo53IqNU6I8UL7s4lsRMJYGNZsn3XUkSaO0UCcCxDOTojRQS3RJMuUfeZijgmRQT3o5Paer2gMZ1OeX2QPqB5G9Pr9T5IjX3fD9BR4Mar75yXAMjs/EKyJuPXMdyB0ecXvASwN2U6Cl6BY79v+0vv5wE8CvTO+EVMv98/IE+8BbAlabQeaktMUM/R4F4RqIguaLk6IcbkDJXPkAIIfiSJZPODNCEz3KwjOCIEC4BQZChw2K0YhRq8Fnooz31ymlwV8Xcv2ua48KoIVEUH3FeTGgZ/Z1Q9hZvSFhaAqyKIMGxYaWq4kSuVgLat9Ce9tpU52rjVH21dLCdK6+LSlyZyeYqc8HWVEjN/lxjOZ6Ju4DCZTI5827ekBpeaXOnF2mMm+g4atsHfMnZYZIcfFukJKqGyLUza7faI9waj5WCGkPOjii1MKhEgh0cDd91KfBMf7oRb2TKcSgXIQW44wI9vCQkxt7H+qOr9xGoRgLFNQAY1j4jaHJ9TmwB/wz3W4ITvEKKKtmjs6Bk+67jRWxm+RL57qk3WX8oaGXaeasJLLFPbXTUpAZ6T767KHVtszwrezrZjhfmnrM0nA+0rVXz8oqdVCkntnqooiqIoiqIoivIHsaIcDShL2W8AAAAASUVORK5CYII=",
+                                  "width": {
+                                    "type": "fixed",
+                                    "value": 24
+                                  },
+                                  "height": {
+                                    "type": "fixed",
+                                    "value": 24
+                                  },
+                                  "preload_required": true,
+                                  "alignment_horizontal": "center",
+                                  "alignment_vertical": "center"
+                                },
+                                {
+                                  "type": "text",
+                                  "text": "А1-А2",
+                                  "width": {
+                                    "type": "wrap_content"
+                                  },
+                                  "font_size": 10,
+                                  "line_height": 12,
+                                  "text_alignment_horizontal": "center"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "container",
+                              "width": {
+                                "type": "match_parent"
+                              },
+                              "height": {
+                                "type": "wrap_content"
+                              },
+                              "alignment_horizontal": "center",
+                              "alignment_vertical": "center",
+                              "content_alignment_horizontal": "center",
+                              "content_alignment_vertical": "center",
+                              "items": [
+                                {
+                                  "type": "image",
+                                  "image_url": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABgCAYAAADimHc4AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAATsSURBVHgB7Z3dUdtAEMcXY3h2KohSQZIK4jzygD8qSFIBUAFQgaECSAXGpgDcAaSDo4L4mQ+T/8JpJiHA7Z100tna34wGTbLg8f51u6vTaY9IURRFURRFUZSmsUYJMx6PO+vr612cZjg+8s+Hhwc+p7W1teyZ+Rz/Z/Dvc5wbnF+3Wq3Z3d3d1XA4nFOiJCUAO7zdbn+C8/o4Bi84ORTDYiwWi8n9/f0sJUGSEOD8/LwLh+/gtIujQ5GBGKf4vJ/b29szqpnaBLBX+w4csUsVOP0VDI5DjIqzukZF5QIk4vjncO44xYg4pIqpVIDpdDqA40clxvayMTgOe73eKVVEJQLgqs9QzZzQU4xfBs42Njb2tra2DEWmRZFBgt2B8y9peZzPDG5vby8xYr9TZKKNAFvD7+N0l5abI4SkPYpEFAE45KDUGyPWf6IVAHnranNzcxgjJJUugHX+RcKJNhSDvPC1bBFKFWCFnZ9TugilCdAA5+eUKkIpAjTI+TmliVBKGWoTbkbNIbu5uRlzpUcFKSwAauXRqlQ7PvB3tmV2sb9DBbA3KifUbPZwn3BEgQQLYKcX+A43lQm1upgjH3wOzQfBIQjOH5E6n+lg2iI4CgQJYEPPgJScLs/0UgBBAuDWvHDyWUFGIVWRtwCY3dxvWMkphe+FvCcevZIwK4wPuVQBXmWOx5sffB5veo0AJN6BOv9NOr6jwEsAjf1ucIHu+NiLBeClI3r1i+iwr6TGYgFw9X8jRYRd4yRClITt48XfpEgRJ2PRCLDrMxU5j0ssJYbSENQnxYvFYiG6MxYJgJjWJcULFCyii9aZAzT+h4M88M6VB5wjQBrLlP+R5E6nAIhlXVJCyVwGkhyQkRIEpiU+Om1cBkgm70kJAtEjc9lIBNCnXuFkLgOnAPlLcUocJDlAR0A4mcsg+vsBytuoADWjAtSMJAkbUkIpZzpaCUNy8UruAwwpQdi+FW8iCUHXpASBqQjjtHEZQMUrUoLAdLTz4pXkAENKENyhxWnjMuD2LqQEwb2KXDZOAfiJjpaiQZjSVkWACSleSMLPo53IqNU6I8UL7s4lsRMJYGNZsn3XUkSaO0UCcCxDOTojRQS3RJMuUfeZijgmRQT3o5Paer2gMZ1OeX2QPqB5G9Pr9T5IjX3fD9BR4Mar75yXAMjs/EKyJuPXMdyB0ecXvASwN2U6Cl6BY79v+0vv5wE8CvTO+EVMv98/IE+8BbAlabQeaktMUM/R4F4RqIguaLk6IcbkDJXPkAIIfiSJZPODNCEz3KwjOCIEC4BQZChw2K0YhRq8Fnooz31ymlwV8Xcv2ua48KoIVEUH3FeTGgZ/Z1Q9hZvSFhaAqyKIMGxYaWq4kSuVgLat9Ce9tpU52rjVH21dLCdK6+LSlyZyeYqc8HWVEjN/lxjOZ6Ju4DCZTI5827ekBpeaXOnF2mMm+g4atsHfMnZYZIcfFukJKqGyLUza7faI9waj5WCGkPOjii1MKhEgh0cDd91KfBMf7oRb2TKcSgXIQW44wI9vCQkxt7H+qOr9xGoRgLFNQAY1j4jaHJ9TmwB/wz3W4ITvEKKKtmjs6Bk+67jRWxm+RL57qk3WX8oaGXaeasJLLFPbXTUpAZ6T767KHVtszwrezrZjhfmnrM0nA+0rVXz8oqdVCkntnqooiqIoiqIoivIHsaIcDShL2W8AAAAASUVORK5CYII=",
+                                  "width": {
+                                    "type": "fixed",
+                                    "value": 24
+                                  },
+                                  "height": {
+                                    "type": "fixed",
+                                    "value": 24
+                                  },
+                                  "preload_required": true,
+                                  "alignment_horizontal": "center",
+                                  "alignment_vertical": "center"
+                                },
+                                {
+                                  "type": "text",
+                                  "text": "В1-В2",
+                                  "width": {
+                                    "type": "wrap_content"
+                                  },
+                                  "font_size": 10,
+                                  "line_height": 12,
+                                  "text_alignment_horizontal": "center"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "container",
+                              "width": {
+                                "type": "match_parent"
+                              },
+                              "height": {
+                                "type": "wrap_content"
+                              },
+                              "alignment_horizontal": "center",
+                              "alignment_vertical": "center",
+                              "content_alignment_horizontal": "center",
+                              "content_alignment_vertical": "center",
+                              "items": [
+                                {
+                                  "type": "image",
+                                  "image_url": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABgCAYAAADimHc4AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAATsSURBVHgB7Z3dUdtAEMcXY3h2KohSQZIK4jzygD8qSFIBUAFQgaECSAXGpgDcAaSDo4L4mQ+T/8JpJiHA7Z100tna34wGTbLg8f51u6vTaY9IURRFURRFUZSmsUYJMx6PO+vr612cZjg+8s+Hhwc+p7W1teyZ+Rz/Z/Dvc5wbnF+3Wq3Z3d3d1XA4nFOiJCUAO7zdbn+C8/o4Bi84ORTDYiwWi8n9/f0sJUGSEOD8/LwLh+/gtIujQ5GBGKf4vJ/b29szqpnaBLBX+w4csUsVOP0VDI5DjIqzukZF5QIk4vjncO44xYg4pIqpVIDpdDqA40clxvayMTgOe73eKVVEJQLgqs9QzZzQU4xfBs42Njb2tra2DEWmRZFBgt2B8y9peZzPDG5vby8xYr9TZKKNAFvD7+N0l5abI4SkPYpEFAE45KDUGyPWf6IVAHnranNzcxgjJJUugHX+RcKJNhSDvPC1bBFKFWCFnZ9TugilCdAA5+eUKkIpAjTI+TmliVBKGWoTbkbNIbu5uRlzpUcFKSwAauXRqlQ7PvB3tmV2sb9DBbA3KifUbPZwn3BEgQQLYKcX+A43lQm1upgjH3wOzQfBIQjOH5E6n+lg2iI4CgQJYEPPgJScLs/0UgBBAuDWvHDyWUFGIVWRtwCY3dxvWMkphe+FvCcevZIwK4wPuVQBXmWOx5sffB5veo0AJN6BOv9NOr6jwEsAjf1ucIHu+NiLBeClI3r1i+iwr6TGYgFw9X8jRYRd4yRClITt48XfpEgRJ2PRCLDrMxU5j0ssJYbSENQnxYvFYiG6MxYJgJjWJcULFCyii9aZAzT+h4M88M6VB5wjQBrLlP+R5E6nAIhlXVJCyVwGkhyQkRIEpiU+Om1cBkgm70kJAtEjc9lIBNCnXuFkLgOnAPlLcUocJDlAR0A4mcsg+vsBytuoADWjAtSMJAkbUkIpZzpaCUNy8UruAwwpQdi+FW8iCUHXpASBqQjjtHEZQMUrUoLAdLTz4pXkAENKENyhxWnjMuD2LqQEwb2KXDZOAfiJjpaiQZjSVkWACSleSMLPo53IqNU6I8UL7s4lsRMJYGNZsn3XUkSaO0UCcCxDOTojRQS3RJMuUfeZijgmRQT3o5Paer2gMZ1OeX2QPqB5G9Pr9T5IjX3fD9BR4Mar75yXAMjs/EKyJuPXMdyB0ecXvASwN2U6Cl6BY79v+0vv5wE8CvTO+EVMv98/IE+8BbAlabQeaktMUM/R4F4RqIguaLk6IcbkDJXPkAIIfiSJZPODNCEz3KwjOCIEC4BQZChw2K0YhRq8Fnooz31ymlwV8Xcv2ua48KoIVEUH3FeTGgZ/Z1Q9hZvSFhaAqyKIMGxYaWq4kSuVgLat9Ce9tpU52rjVH21dLCdK6+LSlyZyeYqc8HWVEjN/lxjOZ6Ju4DCZTI5827ekBpeaXOnF2mMm+g4atsHfMnZYZIcfFukJKqGyLUza7faI9waj5WCGkPOjii1MKhEgh0cDd91KfBMf7oRb2TKcSgXIQW44wI9vCQkxt7H+qOr9xGoRgLFNQAY1j4jaHJ9TmwB/wz3W4ITvEKKKtmjs6Bk+67jRWxm+RL57qk3WX8oaGXaeasJLLFPbXTUpAZ6T767KHVtszwrezrZjhfmnrM0nA+0rVXz8oqdVCkntnqooiqIoiqIoivIHsaIcDShL2W8AAAAASUVORK5CYII=",
+                                  "width": {
+                                    "type": "fixed",
+                                    "value": 24
+                                  },
+                                  "height": {
+                                    "type": "fixed",
+                                    "value": 24
+                                  },
+                                  "preload_required": true,
+                                  "alignment_horizontal": "center",
+                                  "alignment_vertical": "center"
+                                },
+                                {
+                                  "type": "text",
+                                  "text": "С1",
+                                  "width": {
+                                    "type": "wrap_content"
+                                  },
+                                  "font_size": 10,
+                                  "line_height": 12,
+                                  "text_alignment_horizontal": "center"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ],
+                      "margins": {
+                        "bottom": 8
+                      }
+                    }

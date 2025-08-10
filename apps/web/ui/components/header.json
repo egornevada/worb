@@ -2,40 +2,38 @@
   "type": "container",
   "width": { "type": "match_parent" },
   "height": { "type": "fixed", "value": 64 },
-  "paddings": { "top": 12, "right": 12, "bottom": 12, "left": 12 },
+  "paddings": { "top": 8, "right": 8, "bottom": 8, "left": 8 },
   "background": [ { "type": "solid", "color": "#f5f5f5" } ],
   "border": { "corner_radius": 12 },
   "orientation": "horizontal",
+  "alignment_horizontal": "center",
+              "alignment_vertical": "center",
   "items": [
     {
       "type": "container",
       "orientation": "horizontal",
-      "width": { "type": "match_parent" },
+      "width": { "type": "wrap_content"},
       "height": { "type": "match_parent" },
       "items": [
-        {
-          "type": "container",
-          "orientation": "horizontal",
-          "items": [
             { "$include": "/components/days_widget.json" },
             { "$include": "/components/hearts_widget.json" }
           ]
         },
-        { "type": "container", "width": { "type": "match_parent" } },
+                {
+                  "type": "text",
+                  "text": "worb",
+                  "width": {
+                    "type": "match_parent"
+                  },
+                  "text_alignment_horizontal": "center",
+                  "font_size": 16,
+                  "line_height": 24,
+                  "font_weight": "medium",
+                  "text_color": "#424242"
+                },
+    { "type": "container",
+    "width": 
+    { "type": "wrap_content"} },
         { "$include": "/components/theme_toggle.json" }
-      ]
-    },
-    {
-      "type": "text",
-      "text": "worb",
-      "font_size": 18,
-      "font_weight": "medium",
-      "text_color": "#3A3A3A",
-      "width": { "type": "match_parent" },
-      "height": { "type": "match_parent" },
-      "text_alignment_horizontal": "center",
-      "alignment_horizontal": "center",
-      "alignment_vertical": "center"
-    }
-  ]
+  ],"content_alignment_vertical": "center"
 }

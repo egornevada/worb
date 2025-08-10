@@ -1,22 +1,51 @@
 {
-  "type": "container",
-  "width": { "type": "fixed", "value": 44 },
-  "height": { "type": "fixed", "value": 44 },
-  "paddings": { "left": 10, "right": 10, "top": 10, "bottom": 10 },
-  "background": [ { "type": "solid", "color": "#F3F3F3" } ],
-  "border": { "corner_radius": 14 },
-  "items": [
-    {
-      "type": "text",
-      "text": "🌙",
-      "font_size": 18,
-      "alignment_horizontal": "center",
-      "alignment_vertical": "center",
-      "width": { "type": "match_parent" },
-      "height": { "type": "match_parent" }
-    }
-  ],
-  "action": {
-    "log_id": "toggle_theme"
-  }
-}
+                  "type": "container",
+                  "width": {
+                    "type": "fixed",
+                    "value": 96
+                  },
+                  "height": {
+                    "type": "wrap_content"
+                  },
+                  "alignment_horizontal": "center",
+                  "alignment_vertical": "center",
+                  "items": [
+                    {
+                      "type": "image",
+                      "image_url": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABgCAYAAADimHc4AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAU1SURBVHgB7Z3PTltHFMY//ghRCSHnCbiwYZl2l10vNkjs6jxByK474AkSniDhCQJPELOjEiK3u+5i9ghun6CuYdFgG/oduLTExU1azcz9bM9PurrXClLs882cOXPmzFwgEolEIpFIJBKJjBsTGBHq9Xrl4uIivbm5Sfjx6cTERFI8G0nfn+f89xbvLd6b19fXv05OTjbn5uaajUajhYAMrQD3BqcBv6cB6/inkf8XJgivjI8HR0dHGTwzdAKsrq5aK3/F61t+rMAv1lMyXvu+xBgKAay1t9vtTT5uwb/RB5Hz2jk+Pt6DQ6QFEDH8Z3CseMvesA1HTEKUWq22SeOf8/E1RIxvcLzZgEOmIcb6+nrS6XTe0cenEMQGaThEqgdYq7+6uvqoanzS6PV6z+EQiTGgCCnf0PAb0GWbA/BbOKZ0AQqX874IKxVpceB9PpJhqBmfLucDHE2iPJBz0F3JsiyHJ0oTIBr/jlIEiMb/m+ACRON/TlABipntR+ga3yZa39H4TmP9fyPoPMBCTQgbn2yHNL4RTACbZInH+Xs+4vwvEUQA8/s0/mvoYn7fWYLtvxBEAJtoQSih1g8nWi/peoKuhP31f8Mz1Wp1Q3iWa+yFWPkahFcBzPXw9grC0PXsoES8CsB4/wW0o56dUPH+ILwJULT+DehiA+8eSsabAGz9zioVPJGV3foNny5oE8KU7fvv8SKART4Qbv2Myg4UWr/hRQCum/4AYRj370EE58m4NE0r/IG/QZcWUw5PIILzHkDj1yEM3c/PEMK5AFarCWH4/RoQwrkAwiUltzD6ySCEUwGKyVcCXXKV6OcepwIw66mcdLPeeQIxnAognvV0XlboAqcC8Ac+hTAjLwCEF12MYluSFK5dUAJhut1uDjHGqgdUKpXR7gEQFyD0DsivQXaHzLgQBSiZKEDJuBZAzsc+xGpTIcZYCdBqtUZbAMWJTh+jLQBTvXLJrodwsUguV+W6B+TQJoEYrgWQS3Y9RDFb61SAXq8nLYBittapAMVqUw5dkjRNEwjhY01YquqgHw7EKYTwURWRQRupqg3nAjAUtbIP5flAXWlG7FwA2+ojHg1VLi8vZaIhX7WhEpXHg7Az5yCCt43a1WrV6kNlF2jm5+efKCzQ+ExH70KYdru9BQG8CcDB2DY9Kw/GmwqD8RQ8kef5H4uLi9/wMYUms5/I+fl5hhLxuiIWe8GX8SpAsfu8lCMAvpJKcYBIaQQ5rqZWq31QLltnemKlrN3yQRblmSV9CWFXRFf5rixX5G0QfggH5BYH5E98XIcmlU6nM3t2dvYTAhNEAIPRxi9LS0uLfJQsYaeLfMZG8rt9TwQkaF0QXdGWeJ7ozdraWtAGElQAi4qKo39ziMLv977YahWEUo6ttFUpRh7SJyfOzMysHB4e5vBMaQe3RhHuKPXo4ihCycW5tohvh6RCd0y4PWTW58AcLAwdhM0RFhYW9hkdWeLuGfSoMET9kSGqhdLOCw5KF8CwzCl/3KHF4bgTYRZ6pJzHJMvLyyenp6fOZvVS+wPs4FQ7Oli1ssIOnrXXq8Ahsm9RKg59srXbBGKwoTizm4QLegy6pCavXbol+7EJRNaX2Tt3zV3CEUPxIrciXE1RYo8wt0gXtD9WL3J7DK4t1O3dkTTIC/jHBtt9it8Y61cZPoYdjTY1NZUWYli5YQI35LwOzOjdbrfp+0zpoRWgH3NT09PTCQVJ+XHBXmeLuxj+9t7353lxt8ysGfjENpcwEZeVdYh3JBKJRCKRSCQSGR/+BBRJRrklslgZAAAAAElFTkSuQmCC",
+                      "width": {
+                        "type": "fixed",
+                        "value": 24
+                      },
+                      "height": {
+                        "type": "fixed",
+                        "value": 24
+                      },
+                      "preload_required": true,
+                      "alignment_horizontal": "center",
+                      "alignment_vertical": "center"
+                    }
+                  ],
+                  "paddings": {
+                    "top": 12,
+                    "right": 12,
+                    "bottom": 12,
+                    "left": 12
+                  },
+                  "content_alignment_horizontal": "center",
+                  "content_alignment_vertical": "center",
+                  "border": {
+                    "stroke": {
+                      "style": {
+                        "type": "solid"
+                      }
+                    },
+                    "corner_radius": 16
+                  },
+                  "background": [
+                    {
+                      "type": "solid",
+                      "color": "#eeeeee"
+                    }
+                  ]
+                }
