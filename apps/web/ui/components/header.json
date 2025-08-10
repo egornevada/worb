@@ -5,7 +5,7 @@
   "paddings": { "top": 12, "right": 12, "bottom": 12, "left": 12 },
   "background": [ { "type": "solid", "color": "#f5f5f5" } ],
   "border": { "corner_radius": 12 },
-  "orientation": "overlap",
+  "orientation": "horizontal",
   "items": [
     {
       "type": "container",

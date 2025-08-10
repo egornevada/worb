@@ -9,15 +9,21 @@
           "orientation": "vertical",
           "width": { "type": "match_parent" },
           "paddings": { "top": 16, "bottom": 24 },
-          "alignment_horizontal": "center",
           "items": [
             {
               "type": "container",
               "orientation": "vertical",
-              "width": { "type": "fixed", "value": 375 },
+              "width": { "type": "match_parent" },
               "height": { "type": "wrap_content" },
               "items": [
-                { "$include": "/components/header.json" },
+                {
+                  "type": "container",
+                  "width": { "type": "match_parent" },
+                  "height": { "type": "wrap_content" },
+                  "items": [
+                    { "$include": "/components/header.json" }
+                  ]
+                },
 
                 {
                   "type": "text",
