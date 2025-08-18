@@ -1,0 +1,22 @@
+{
+  "type": "container",
+  "orientation": "horizontal",
+  "width":  { "type": "match_parent" },
+  "height": { "type": "fixed", "value": 12 },
+  "margins": { "top": 0, "right": 16, "bottom": 0, "left": 16 },
+  "border": { "corner_radius": 6 },
+  "items": [
+    {
+      "type": "container",
+      "height": { "type": "match_parent" },
+      "weight": "@{correct}",
+      "background": [ { "type": "solid", "color": "#46B100" } ]
+    },
+    {
+      "type": "container",
+      "height": { "type": "match_parent" },
+      "weight": "@{max(total - correct, 0)}",
+      "background": [ { "type": "solid", "color": "#eeeeee" } ]
+    }
+  ]
+}

@@ -51,6 +51,7 @@
                     }
                   ],
                   "content_alignment_horizontal": "center",
+                  
                   "content_alignment_vertical": "bottom",
                   "paddings": {
                     "top": 8,
@@ -84,7 +85,7 @@
                         }
                       ],
                       "action": {
-                        "log_id": "start_clicked",
+                        "log_id": "open_lesson",
                         "url": "#open_lesson",
                         "payload": { "lesson_id": "1" }
                       }
@@ -96,19 +97,63 @@
                   "width": { "type": "match_parent" },
                   "height": { "type": "wrap_content" },
                   "items": [
-                    { "$include": "/components/tst-level-true.json" },
-                    { "$include": "/components/tst-level-false.json" },
-                    { "$include": "/components/tst-level-false.json" },
-                    { "$include": "/components/tst-level-false.json" },
-                    { "$include": "/components/tst-level-false.json" }
-                    ],
+                    {
+                      "type": "container",
+                      "width": { "type": "match_parent" },
+                      "action": {
+                        "log_id": "open_lesson",
+                        "url": "#open_lesson",
+                        "payload": { "lesson_id": "1" }
+                      },
+                      "items": [ { "$include": "/components/tst-level-true.json" } ]
+                    },
+                    {
+                      "type": "container",
+                      "width": { "type": "match_parent" },
+                      "action": {
+                        "log_id": "open_lesson",
+                        "url": "#open_lesson",
+                        "payload": { "lesson_id": "1" }
+                      },
+                      "items": [ { "$include": "/components/tst-level-false.json" } ]
+                    },
+                    {
+                      "type": "container",
+                      "width": { "type": "match_parent" },
+                      "action": {
+                        "log_id": "open_lesson",
+                        "url": "#open_lesson",
+                        "payload": { "lesson_id": "1" }
+                      },
+                      "items": [ { "$include": "/components/tst-level-false.json" } ]
+                    },
+                    {
+                      "type": "container",
+                      "width": { "type": "match_parent" },
+                      "action": {
+                        "log_id": "open_lesson",
+                        "url": "#open_lesson",
+                        "payload": { "lesson_id": "1" }
+                      },
+                      "items": [ { "$include": "/components/tst-level-false.json" } ]
+                    },
+                    {
+                      "type": "container",
+                      "width": { "type": "match_parent" },
+                      "action": {
+                        "log_id": "open_lesson",
+                        "url": "#open_lesson",
+                        "payload": { "lesson_id": "1" }
+                      },
+                      "items": [ { "$include": "/components/tst-level-false.json" } ]
+                    }
+                  ],
                   "paddings": {
                     "top": 8,
                     "right": 8,
                     "bottom": 8,
                     "left": 8
                   }
-            
                 }
                 
               ]

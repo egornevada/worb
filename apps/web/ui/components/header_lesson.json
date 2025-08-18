@@ -1,0 +1,82 @@
+{
+  "type": "container",
+  "width": { "type": "match_parent" },
+  "height": { "type": "fixed", "value": 64 },
+  "paddings": { "top": 8, "right": 8, "bottom": 8, "left": 8 },
+  "margins": { "top": 0, "right": 8, "bottom": 0, "left": 8 },
+  "background": [ { "type": "solid", "color": "#f5f5f5" } ],
+  "border": { "corner_radius": 12 },
+  "orientation": "horizontal",
+  "alignment_horizontal": "center",
+              "alignment_vertical": "center",
+  "items": [
+    {
+      "type": "container",
+      "orientation": "horizontal",
+      "width": { "type": "wrap_content"},
+      "height": { "type": "match_parent" },
+      "items": [
+            {
+                  "type": "container",
+                  "width": {
+                    "type": "fixed",
+                    "value": 48
+                  },
+                  "height": {
+                    "type": "wrap_content"
+                  },
+                  "alignment_horizontal": "center",
+                  "alignment_vertical": "center",
+                  "items": [
+                    {
+                      "type": "image",
+                      "image_url": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABgCAYAAADimHc4AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAKzSURBVHgB7dxPbptAFAbwBxVWV4jewPgUWeI/B/AN2hyhu257gqYnaG5Qll5giyMkJ4AjIHlpGWcmMYqjxMkgDzAv7/tJURDKxt/HmAkMEAEAAAAAAAAAAAAAAECnPGJouVxG2+020dtBENytVquSmGJXwHw+/344HG7UZtTs833/Jsuyn8TQF2LkGP6t2vx6ul/tu4rj2CuKIidm2IyAk/DPqcIwjNM0rYgRnxgwCF+LqqqKiBnnCzAM/1EURayOfs3pAtqE73leyu3rR3O2gDbhK+V+v2c5C3LyJNw2/Lqup3mel8SQcwVICl9zqgBp4WvOFCAxfM2JAqSGrw1egOTwtUELkB6+NlgBCP/JIAUg/Ge9F4DwX+q1AIT/Wm8FIPy39VIAwj+v8wIQ/vs6LQDhf6yzAhC+mU4KQPjmrBeA8NuxWgDCb89aAS3DZ0vd/M+DILi2tRzSSgEq/KUK/z8J4vv+NMuynC5kZVWECv8PCWPrM188ApIkGaujoSCB1DksvvQcxmJp4md2cQHHI6AkeUobMzgrI0B9BV2TMGo2ZGUlnpUCjrMBESXoaaieAa3X65QssPqP2Gw2+6F+/TP883I0Gk05P15kg/VLESihnU4uxqEEc51djkYJZjq9IYMSPtb5LUmU8L5ebsqjhPN6W5aCEt7W68IslPBa70sTUcJLgyzORQnPBluejhKeDPqABkpw4BEl6SU48ZCe5BKceUxVagnOFKBJLMGpAjRpJThXgCapBCcL0KSU4Oy6oM1mc0vmN/rHu93OtCynODsCGm1GQhiG3/DSPsvajASOL+1zfgQ0TEaCKovN52mwWRtqMBJ+E0Os3pxbFMXdZDK5V5tXdPLqYs/z/qqCfhFD7IZsY7FYJHVdj9VPmuc5u9dVAgAAAAAAAAAAAAAAQE8eAFQO/W3+hmYTAAAAAElFTkSuQmCC",
+                      "width": {
+                        "type": "fixed",
+                        "value": 24
+                      },
+                      "height": {
+                        "type": "fixed",
+                        "value": 24
+                      },
+                      "preload_required": true,
+                      "alignment_horizontal": "center",
+                      "alignment_vertical": "center"
+                    }
+                  ],
+                  "paddings": {
+                    "top": 12,
+                    "right": 12,
+                    "bottom": 12,
+                    "left": 12
+                  },
+                  "content_alignment_horizontal": "center",
+                  "content_alignment_vertical": "center",
+                  "border": {
+                    "stroke": {
+                      "style": {
+                        "type": "solid"
+                      }
+                    },
+                    "corner_radius": 16
+                  },
+                  "background": [
+                    {
+                      "type": "solid",
+                      "color": "#eeeeee"
+                    }
+                  ]
+                }
+          ]
+        },
+        { "type": "container",
+    "width": 
+    { "type": "wrap_content"} },
+         { "$include": "/components/progress_bar.json" },
+      
+    { "type": "container",
+    "width": 
+    { "type": "wrap_content"} },
+         { "$include": "/components/hearts_widget.json" }
+  ],"content_alignment_vertical": "center"
+}

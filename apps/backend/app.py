@@ -74,14 +74,40 @@ def _resolve_includes(node, *, base_dir: Path | None = None):
 # ---------- API ----------
 @app.get("/lesson/<int:lesson_id>")
 def get_lesson(lesson_id: int):
+    """Отдаём страницу урока. Пробуем несколько вариантов:
+    - pages/lesson_<id>.json (если есть отдельный файл для урока)
+    - pages/lesson.json (общий шаблон урока)
+    - pages/lesson_not_ready.json (фолбэк)
+    Если ничего не нашли — возвращаем домашний экран.
+    Все $include разворачиваются.
     """
-    Всегда отдаём домашний экран из /apps/web/ui/pages/home.json
-    (внутри него могут быть $include'ы, их разворачиваем).
-    """
+    candidates = [
+        UI_DIR / "pages" / f"lesson_{lesson_id}.json",
+        UI_DIR / "pages" / "lesson.json",
+        UI_DIR / "pages" / "lesson_not_ready.json",
+    ]
+
+    card = None
+    for p in candidates:
+        if p.exists():
+            with open(p, "r", encoding="utf-8") as f:
+                card = json.load(f)
+            break
+
+    if card is None:
+        with open(UI_DIR / "pages" / "home.json", "r", encoding="utf-8") as f:
+            card = json.load(f)
+
+    card = _resolve_includes(card)
+    return jsonify(card)
+
+
+# Фронт может вызывать /home напрямую
+@app.get("/home")
+def get_home():
     page_path = UI_DIR / "pages" / "home.json"
     with open(page_path, "r", encoding="utf-8") as f:
         card = json.load(f)
-
     card = _resolve_includes(card)
     return jsonify(card)
 
