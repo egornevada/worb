@@ -1,0 +1,53 @@
+{
+              "type": "container",
+              "width": {
+                "type": "match_parent"
+              },
+              "height": {
+                "type": "wrap_content"
+              },
+              "alignment_horizontal": "center",
+              "alignment_vertical": "center",
+              "items": [
+                {
+                  "type": "container",
+                  "width": {
+                    "type": "match_parent"
+                  },
+                  "height": {
+                    "type": "fixed",
+                    "value": 48
+                  },
+                  "alignment_horizontal": "center",
+                  "alignment_vertical": "center",
+                  "items": [
+                    {
+                      "type": "text",
+                      "text": "Проверить",
+                      "width": {
+                        "type": "wrap_content"
+                      },
+                      "font_size": 16,
+                      "line_height": 24,
+                      "text_color": "#b3b3b3"
+                    }
+                  ],
+                  "orientation": "horizontal",
+                  "content_alignment_horizontal": "center",
+                  "border": { "corner_radius": 12 },
+                  "content_alignment_vertical": "center",
+                  "background": [
+                    {
+                      "type": "solid",
+                      "color": "#dbdbdb"
+                    }
+                  ]
+                }
+              ],
+              "paddings": {
+                "top": 8,
+                "right": 8,
+                "bottom": 16,
+                "left": 8
+              }
+            }

@@ -1,0 +1,90 @@
+{
+              "type": "container",
+              "width": {
+                "type": "match_parent"
+              },
+              "height": {
+                "type": "fixed",
+                "value": 200
+              },
+              "alignment_horizontal": "center",
+              "alignment_vertical": "center",
+              "items": [
+                {
+                  "type": "container",
+                  "width": {
+                    "type": "match_parent"
+                  },
+                  "height": {
+                    "type": "match_parent"
+                  },
+                  "alignment_horizontal": "center",
+                  "alignment_vertical": "center",
+                  "items": [
+                    {
+                      "type": "text",
+                      "text": "pharmacy",
+                      "width": {
+                        "type": "match_parent"
+                      },
+                      "text_alignment_horizontal": "center",
+                      "font_size": 16,
+                      "line_height": 24,
+                      "text_color": "#424242"
+                    }
+                  ],
+                  "background": [
+                    {
+                      "type": "solid",
+                      "color": "#f5f5f5"
+                    }
+                  ],
+                  "content_alignment_horizontal": "center",
+                  "content_alignment_vertical": "center",
+                  "border": { "corner_radius": 12 },
+                  "margins": {
+                    "right": 8
+                  }
+                },
+                {
+                  "type": "container",
+                  "width": {
+                    "type": "match_parent"
+                  },
+                  "height": {
+                    "type": "match_parent"
+                  },
+                  "alignment_horizontal": "center",
+                  "alignment_vertical": "center",
+                  "items": [
+                    {
+                      "type": "text",
+                      "text": "pharmacy",
+                      "width": {
+                        "type": "match_parent"
+                      },
+                      "text_alignment_horizontal": "center",
+                      "font_size": 16,
+                      "line_height": 24,
+                      "text_color": "#424242"
+                    }
+                  ],
+                  "background": [
+                    {
+                      "type": "solid",
+                      "color": "#f5f5f5"
+                    }
+                  ],
+                  "content_alignment_horizontal": "center",
+                  "content_alignment_vertical": "center",
+                  "border": { "corner_radius": 12 }
+                }
+              ],
+              "orientation": "horizontal",
+              "paddings": {
+                "top": 8,
+                "right": 8,
+                "bottom": 8,
+                "left": 8
+              }
+            }

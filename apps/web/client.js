@@ -81,6 +81,12 @@
           // лог
           postLog(a);
 
+          // Прямой обработчик возврата на главную по семантике
+          if (a && a.log_id === 'go_home') {
+            load('/home');
+            return;
+          }
+
           // Нормализуем url, если он есть
           const nav = resolveUrl(a);
           if (nav) {
@@ -119,6 +125,12 @@
           if (!a) return; // чужие события игнорим
 
           postLog(a);
+
+          // Прямой обработчик возврата на главную по семантике
+          if (a && a.log_id === 'go_home') {
+            load('/home');
+            return;
+          }
 
           // 1) Явная навигация по URL (терпим разные формы)
           const nav = resolveUrl(a);
