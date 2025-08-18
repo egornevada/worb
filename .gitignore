@@ -6,3 +6,12 @@ __pycache__/
 .vscode/
 dist/
 build/
+# --- Strapi (apps/cms) ---
+/apps/cms/node_modules/
+/apps/cms/.cache/
+/apps/cms/.tmp/
+/apps/cms/build/
+/apps/cms/public/uploads/*
+!/apps/cms/public/uploads/.gitkeep
+/apps/cms/.env
+/apps/cms/.env.*
