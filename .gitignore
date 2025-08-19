@@ -15,3 +15,7 @@ build/
 !/apps/cms/public/uploads/.gitkeep
 /apps/cms/.env
 /apps/cms/.env.*
+
+# --- Backend env ---
+/apps/backend/.env
+/apps/backend/.env.*

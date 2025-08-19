@@ -14,7 +14,7 @@
     "title": {
       "type": "string"
     },
-    "slud": {
+    "slug": {
       "type": "uid",
       "targetField": "title"
     },
@@ -30,9 +30,9 @@
     },
     "words": {
       "type": "relation",
-      "relation": "manyToOne",
+      "relation": "oneToMany",
       "target": "api::word.word",
-      "inversedBy": "lessons"
+      "mappedBy": "lesson"
     }
   }
 }

@@ -395,12 +395,12 @@ export interface ApiLessonLesson extends Struct.CollectionTypeSchema {
     > &
       Schema.Attribute.Private;
     publishedAt: Schema.Attribute.DateTime;
-    slud: Schema.Attribute.UID<'title'>;
+    slug: Schema.Attribute.UID<'title'>;
     title: Schema.Attribute.String;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
-    words: Schema.Attribute.Relation<'manyToOne', 'api::word.word'>;
+    words: Schema.Attribute.Relation<'oneToMany', 'api::word.word'>;
   };
 }
 
@@ -420,7 +420,7 @@ export interface ApiWordWord extends Struct.CollectionTypeSchema {
       Schema.Attribute.Private;
     distractor1: Schema.Attribute.String;
     image: Schema.Attribute.Media<'images' | 'files' | 'videos' | 'audios'>;
-    lessons: Schema.Attribute.Relation<'oneToMany', 'api::lesson.lesson'>;
+    lesson: Schema.Attribute.Relation<'manyToOne', 'api::lesson.lesson'>;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<'oneToMany', 'api::word.word'> &
       Schema.Attribute.Private;

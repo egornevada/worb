@@ -30,11 +30,11 @@
     "distractor1": {
       "type": "string"
     },
-    "lessons": {
+    "lesson": {
       "type": "relation",
-      "relation": "oneToMany",
+      "relation": "manyToOne",
       "target": "api::lesson.lesson",
-      "mappedBy": "words"
+      "inversedBy": "words"
     }
   }
 }
