@@ -85,10 +85,9 @@
                         }
                       ],
                       "action": {
-                        "log_id": "open_lesson",
-                        "url": "#open_lesson",
-                        "payload": { "lesson_id": "1" }
-                      }
+  "log_id": "start_lesson",
+  "url": "/view/lesson/2?i=0"
+}
                     }
                   ]
                 },

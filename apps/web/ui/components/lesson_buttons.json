@@ -12,6 +12,7 @@
               "items": [
                 {
                   "type": "container",
+                  "id": "choice_left",
                   "width": {
                     "type": "match_parent"
                   },
@@ -23,7 +24,8 @@
                   "items": [
                     {
                       "type": "text",
-                      "text": "pharmacy",
+                      "id": "choice_left_text",
+                      "text": "test1",
                       "width": {
                         "type": "match_parent"
                       },
@@ -48,6 +50,7 @@
                 },
                 {
                   "type": "container",
+                  "id": "choice_right",
                   "width": {
                     "type": "match_parent"
                   },
@@ -59,7 +62,8 @@
                   "items": [
                     {
                       "type": "text",
-                      "text": "pharmacy",
+                      "id": "choice_right_text",
+                      "text": "test2",
                       "width": {
                         "type": "match_parent"
                       },

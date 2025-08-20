@@ -1,184 +1,170 @@
 // apps/web/client.js
-// Загружаем DivKit-карту и рендерим через глобальный API window.Ya.DivKit.render.
-// Клики по элементам с "action" ловим в onStat и отправляем POST на бэкенд.
+// Single‑page client for DivKit: interprets browser URL under /view/*,
+// fetches corresponding JSON from backend (/home, /lesson/<id>?i=...),
+// renders it with DivKit and handles in‑app navigation via action events.
 
-(async function () {
+(function () {
   const root = document.getElementById('root');
+  let div = null; // DivKit instance created on first render
 
+  // ----------------------------- utils -----------------------------------
   function postLog(action) {
-    // action: { log_id?, payload? }
-    fetch('/log', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        event: action?.log_id || 'click',
-        payload: action?.payload || {},
-        ts: Date.now(),
-      }),
-    }).catch((err) => console.error('POST /log failed:', err));
+    try {
+      fetch('/log', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          event: action?.log_id || 'click',
+          payload: action?.payload || {},
+          ts: Date.now(),
+        }),
+      }).catch(() => {});
+    } catch (_) {}
   }
 
-  // Пытаемся достать action из разных форматов onStat
+  // Extract action object from onAction/onStat payloads of different shapes
   function extractAction(obj) {
     if (!obj || typeof obj !== 'object') return null;
-    if (obj.url || obj.log_id || obj.payload) return obj;
+    if (obj.url || obj.href || obj.log_id || obj.payload) return obj; // already action-like
     if (obj.action) return extractAction(obj.action);
     if (obj.stat && obj.stat.action) return extractAction(obj.stat.action);
     if (obj.data && obj.data.action) return extractAction(obj.data.action);
     if (obj.event && obj.event.action) return extractAction(obj.event.action);
     return null;
   }
-  // Унифицируем вытягивание URL из разных форматов action (строка или объект)
-  function resolveUrl(a) {
-    if (!a) return null;
 
-    let url = null;
-    // 1) Строка: "/lesson/1" или "lesson/1" или "#open_lesson"
-    if (typeof a.url === 'string') url = a.url;
-    // 2) Объект DivKit LinkAction: { url: "/lesson/1" }
-    else if (a.url && typeof a.url.url === 'string') url = a.url.url;
-    // 3) Иногда встречается `href`
-    else if (typeof a.href === 'string') url = a.href;
+  // Convert anything action-like to a string URL if possible
+  function resolveUrlLike(obj) {
+    const pick = (o) => {
+      if (!o) return null;
+      if (typeof o === 'string') return o;
+      if (typeof o.url === 'string') return o.url;
+      if (o.url && typeof o.url.url === 'string') return o.url.url;
+      if (typeof o.href === 'string') return o.href;
+      if (typeof o.path === 'string') return o.path;
+      if (typeof o.route === 'string') return o.route;
+      return null;
+    };
 
-    // Если URL так и не нашли, но есть семантика
-    if (!url && a.log_id === 'open_lesson') url = '/lesson';
+    let url =
+      pick(obj) ||
+      pick(obj?.payload) ||
+      pick(obj?.stat) ||
+      pick(obj?.data) ||
+      pick(obj?.event);
 
     if (!url) return null;
+    url = String(url).trim();
+    if (!url) return null;
 
-    url = url.trim();
-    if (!url.startsWith('/')) url = '/' + url; // поддерживаем 'lesson/1'
+    // semantic shortcuts
+    if (url === '#go_home') return '/home';
+    if (url === '#open_lesson') return '/lesson';
 
-    // Алиасы из песочницы/шаблонов
-    if (url === '#go_home') url = '/home';
-    if (url === '#open_lesson') url = '/lesson';
-
+    if (!url.startsWith('/')) url = '/' + url;
     return url;
   }
 
-  // Загружает JSON со стороны бэка и перерисовывает DivKit
-  async function load(path) {
-    const res = await fetch(path);
-    if (!res.ok) throw new Error(`GET ${path} -> ${res.status}`);
+  // --------------------------- routing layer ------------------------------
+  // Map browser route (/view/...) to backend JSON endpoint
+  function routeToApi(viewPath) {
+    const qIndex = viewPath.indexOf('?');
+    const pathname = qIndex >= 0 ? viewPath.slice(0, qIndex) : viewPath;
+    const search = qIndex >= 0 ? viewPath.slice(qIndex) : '';
+
+    if (pathname === '/' || pathname === '/view' || pathname === '/view/' || pathname === '/view/home') {
+      return '/home';
+    }
+
+    const m = pathname.match(/^\/view\/lesson\/(\d+)$/);
+    if (m) {
+      return `/lesson/${m[1]}${search}`;
+    }
+
+    if (pathname.startsWith('/view/')) {
+      const tail = pathname.replace(/^\/view\//, '');
+      return `/ui/pages/${tail}.json`;
+    }
+
+    // direct API path fallback (e.g. /home or /lesson/2?i=1)
+    return viewPath;
+  }
+
+  async function fetchCard(viewPath) {
+    const api = routeToApi(viewPath);
+    const res = await fetch(api, { headers: { Accept: 'application/json' } });
+    if (!res.ok) throw new Error(`${api} -> ${res.status}`);
     const json = await res.json();
-
-    // очищаем контейнер перед новым рендером
-    root.innerHTML = '';
-
-    renderJson(json);
+    render(json);
   }
 
-  // Один общий рендер с подпиской на клики
-  function renderJson(json) {
-    window.Ya.DivKit.render({
-      id: 'demo',
-      target: root,
-      json,
-      onError: (e) => console.error('DivKit error:', e),
-      // Навигация и логирование по action (надёжнее, чем ловить это через onStat)
-      onAction: (a) => {
-        try {
-          if (!a) return;
-          // лог
-          postLog(a);
-
-          // Прямой обработчик возврата на главную по семантике
-          if (a && a.log_id === 'go_home') {
-            load('/home');
-            return;
-          }
-
-          // Нормализуем url, если он есть
-          const nav = resolveUrl(a);
-          if (nav) {
-            console.debug('navigate(onAction):', nav, a.payload || {});
-            if (nav === '/home') {
-              load('/home');
-              return;
-            }
-            if (nav === '/lesson' || nav.startsWith('/lesson/')) {
-              const id =
-                (a.payload && (a.payload.lesson_id || a.payload.id)) ||
-                nav.split('/')[2] ||
-                '1';
-              load(`/lesson/${id}`);
-              return;
-            }
-          }
-
-          // Вариант навигации по log_id без url
-          if (a.log_id === 'open_lesson') {
-            const id = (a.payload && (a.payload.lesson_id || a.payload.id)) || '1';
-            load(`/lesson/${id}`);
-          }
-        } catch (err) {
-          console.error('onAction handler error:', err);
-        }
-      },
-      // Аналитика (оставляем для дебага), навигацию делает onAction
-      onStat: (details) => {
-        try {
-          // Смотрим, что реально прилетает
-          console.debug('DivKit onStat:', details);
-
-          // Универсально извлекаем action (поддержка разных форматов DivKit)
-          const a = extractAction(details);
-          if (!a) return; // чужие события игнорим
-
-          postLog(a);
-
-          // Прямой обработчик возврата на главную по семантике
-          if (a && a.log_id === 'go_home') {
-            load('/home');
-            return;
-          }
-
-          // 1) Явная навигация по URL (терпим разные формы)
-          const nav = resolveUrl(a);
-          if (nav) {
-            console.debug('navigate(onStat):', nav, a.payload || {});
-            if (nav === '/home') {
-              load('/home');
-              return;
-            }
-            if (nav === '/lesson' || nav.startsWith('/lesson/')) {
-              const id =
-                (a.payload && (a.payload.lesson_id || a.payload.id)) ||
-                nav.split('/')[2] ||
-                '1';
-              load(`/lesson/${id}`);
-              return;
-            }
-          }
-
-          // 2) Семантический вариант
-          if (a.log_id === 'open_lesson') {
-            const id = (a.payload && (a.payload.lesson_id || a.payload.id)) || '1';
-            load(`/lesson/${id}`);
-            return;
-          }
-        } catch (err) {
-          console.error('onStat handler error:', err);
-        }
-      },
-    });
-  }
-
-  try {
-    if (!window.Ya || !window.Ya.DivKit) {
+  function render(json) {
+    const DivKit = window.Ya && window.Ya.DivKit;
+    if (!DivKit) {
+      root.textContent = 'DivKit bundle не найден. Проверь подключение Ya.DivKit.';
       console.error('DivKit not found at window.Ya.DivKit');
-      root.textContent = 'DivKit bundle не загрузился — см. консоль';
       return;
     }
 
-    // Стартуем с загрузки первой страницы (домашней/урока)
-    try {
-      await load('/home');
-    } catch (e2) {
-      console.warn('GET /home failed, fallback to /lesson/1:', e2);
-      await load('/lesson/1');
+    if (!div) {
+      div = DivKit.render({
+        id: 'demo',
+        target: root,
+        json,
+        onError: (e) => console.error('DivKit error:', e),
+        onAction: handleAction,
+        onStat: handleAction, // обратная совместимость
+      });
+    } else {
+      div.setData(json);
     }
-  } catch (e) {
-    console.error('Load error:', e);
-    root.textContent = 'чето не так, смотри консоль';
   }
+
+  // ------------------------- navigation handlers --------------------------
+  async function handleAction(evt) {
+    try {
+      const a = extractAction(evt) || evt?.action || evt;
+      if (!a) return false;
+      postLog(a);
+
+      // semantic actions
+      if (a.log_id === 'go_home') {
+        await go('/view/home');
+        return true;
+      }
+      if (a.log_id === 'open_lesson') {
+        const id = a?.payload?.lesson_id || a?.payload?.id;
+        if (id) {
+          await go(`/view/lesson/${id}`);
+          return true;
+        }
+      }
+
+      // url-based actions (support /lesson/.. and /home)
+      const url = resolveUrlLike(a) || resolveUrlLike(a?.payload);
+      if (url) {
+        let viewUrl = url;
+        if (url.startsWith('/lesson')) viewUrl = '/view' + url;
+        if (url === '/home') viewUrl = '/view/home';
+        await go(viewUrl);
+        return true;
+      }
+    } catch (e) {
+      console.error('handleAction error:', e);
+    }
+    return false;
+  }
+
+  async function go(viewUrl) {
+    history.pushState({}, '', viewUrl);
+    await fetchCard(viewUrl);
+  }
+
+  // ------------------------------ bootstrap -------------------------------
+  const start = (location.pathname + (location.search || '')) || '/view/home';
+  fetchCard(start);
+
+  window.addEventListener('popstate', () => {
+    fetchCard(location.pathname + (location.search || ''));
+  });
 })();
