@@ -1,0 +1,80 @@
+{
+    "card": {
+        "log_id": "test",
+        "states": [
+            {
+                "state_id": 0,
+                "div": {
+                    "type": "container",
+                    "orientation": "vertical",
+                    "width": {
+                        "type": "match_parent"
+                    },
+                    "paddings": {
+                        "top": 16,
+                        "bottom": 24
+                    },
+                    "items": [
+                        {
+                            "type": "container",
+                            "orientation": "vertical",
+                            "width": {
+                                "type": "match_parent"
+                            },
+                            "height": {
+                                "type": "wrap_content"
+                            },
+                            "items": [
+                                {
+                                    "type": "container",
+                                    "width": {
+                                        "type": "match_parent"
+                                    },
+                                    "height": {
+                                        "type": "wrap_content"
+                                    },
+                                    "items": [
+                                        {
+                                            "$include": "/components/header/hearts_widget.json"
+                                        },
+                                        {
+                                            "type": "text",
+                                            "text": "force brand",
+                                            "action": {
+                                                "log_id": "debug_click",
+                                                "set_state": {
+                                                    "id": "lesson_card_state",
+                                                    "state_id": "brand"
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "type": "container",
+                                            "height": {
+                                                "type": "fixed",
+                                                "value": 148
+                                            },
+                                            "action": {
+                                                "log_id": "lesson_card_set_state",
+                                                "payload": {
+                                                    "id": "lesson_card_state",
+                                                    "state_id": "brand"
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "$include": "/components/lesson_card.json"
+                                        },
+                                        {
+                                            "$include": "/components/header/hearts_widget.json"
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            }
+        ]
+    }
+}

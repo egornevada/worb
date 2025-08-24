@@ -1,19 +1,35 @@
 // apps/web/client.js
-// Single‑page client for DivKit: interprets browser URL under /view/*,
-// fetches corresponding JSON from backend (/home, /lesson/<id>?i=...),
-// renders it with DivKit and handles in‑app navigation via action events.
+// SPA client for DivKit: routes /view/* to backend JSON, renders via DivKit,
+// supports state switching (SDK and JSON fallback), simple prefetch cache.
 
 (function () {
-  const root = document.getElementById('root');
-  let div = null; // DivKit instance created on first render
+  'use strict';
 
-  // --------------------- prefetch cache (next step) ----------------------
+  const root = document.getElementById('root');
+  let div = null;           // DivKit instance
+  let currentJson = null;   // last rendered JSON (for fallback state change)
+
+  // ----------------------------- small cache ------------------------------
   const CARD_CACHE_MAX = 8;
-  const cardCache = new Map(); // key: API URL (/home, /lesson/2?i=1), value: JSON
+  const cardCache = new Map(); // key: API URL, value: JSON
+
+  function prewarmImagesFromCard(cardJson) {
+    try {
+      const urls = [];
+      (function walk(n) {
+        if (!n || typeof n !== 'object') return;
+        if (Array.isArray(n)) { n.forEach(walk); return; }
+        if (n.type === 'image' && typeof n.image_url === 'string') {
+          urls.push(n.image_url);
+        }
+        Object.values(n).forEach(walk);
+      })(cardJson);
+      urls.forEach((src) => { try { const i = new Image(); i.src = src; } catch (_) {} });
+    } catch (_) {}
+  }
 
   function fetchCardWithCache(apiPath) {
     if (cardCache.has(apiPath)) {
-      // return a safe clone (avoid accidental mutations)
       return Promise.resolve(structuredClone(cardCache.get(apiPath)));
     }
     return fetch(apiPath, { headers: { Accept: 'application/json' } })
@@ -30,55 +46,6 @@
         prewarmImagesFromCard(json);
         return structuredClone(json);
       });
-  }
-
-  function prewarmImagesFromCard(cardJson) {
-    try {
-      const urls = [];
-      (function walk(n) {
-        if (!n || typeof n !== 'object') return;
-        if (Array.isArray(n)) { n.forEach(walk); return; }
-        if (n.type === 'image' && typeof n.image_url === 'string') {
-          urls.push(n.image_url);
-        }
-        Object.values(n).forEach(walk);
-      })(cardJson);
-      urls.forEach((src) => { try { const img = new Image(); img.src = src; } catch (_) {} });
-    } catch (_) {}
-  }
-
-  function parseViewLesson(viewPath) {
-    // /view/lesson/2?i=1 -> { id:2, i:1 }
-    const url = new URL(viewPath, location.origin);
-    const m = url.pathname.match(/^\/view\/lesson\/(\d+)\/?$/);
-    if (!m) return null;
-    const id = Number(m[1]);
-    const i = url.searchParams.has('i') ? Number(url.searchParams.get('i')) : 0;
-    return { id, i };
-  }
-
-  function parseViewLessonSlug(viewPath) {
-    // /view/lesson/slug/my-lesson?i=1 -> { slug:"my-lesson", i:1 }
-    const url = new URL(viewPath, location.origin);
-    const m = url.pathname.match(/^\/view\/lesson\/slug\/([^\/]+)\/?$/);
-    if (!m) return null;
-    const slug = decodeURIComponent(m[1]);
-    const i = url.searchParams.has('i') ? Number(url.searchParams.get('i')) : 0;
-    return { slug, i };
-  }
-
-  function nextViewUrl(viewPath) {
-    const pId = parseViewLesson(viewPath);
-    if (pId) {
-      const nextI = (pId.i ?? 0) + 1;
-      return `/view/lesson/${pId.id}?i=${nextI}`;
-    }
-    const pSlug = parseViewLessonSlug(viewPath);
-    if (pSlug) {
-      const nextI = (pSlug.i ?? 0) + 1;
-      return `/view/lesson/slug/${encodeURIComponent(pSlug.slug)}?i=${nextI}`;
-    }
-    return null;
   }
 
   function preloadViewUrl(viewPath) {
@@ -98,7 +65,7 @@
       .catch(() => {});
   }
 
-  // ----------------------------- utils -----------------------------------
+  // ------------------------------- utils ----------------------------------
   function postLog(action) {
     try {
       fetch('/log', {
@@ -113,10 +80,9 @@
     } catch (_) {}
   }
 
-  // Extract action object from onAction/onStat payloads of different shapes
   function extractAction(obj) {
     if (!obj || typeof obj !== 'object') return null;
-    if (obj.url || obj.href || obj.log_id || obj.payload) return obj; // already action-like
+    if (obj.url || obj.href || obj.log_id || obj.payload || obj.set_state) return obj;
     if (obj.action) return extractAction(obj.action);
     if (obj.stat && obj.stat.action) return extractAction(obj.stat.action);
     if (obj.data && obj.data.action) return extractAction(obj.data.action);
@@ -124,7 +90,6 @@
     return null;
   }
 
-  // Convert anything action-like to a string URL if possible
   function resolveUrlLike(obj) {
     const pick = (o) => {
       if (!o) return null;
@@ -148,7 +113,6 @@
     url = String(url).trim();
     if (!url) return null;
 
-    // semantic shortcuts
     if (url === '#go_home') return '/home';
     if (url === '#open_lesson') return '/lesson';
 
@@ -157,26 +121,29 @@
   }
 
   // --------------------------- routing layer ------------------------------
-  // Map browser route (/view/...) to backend JSON endpoint
+  // Map /view/* to backend API endpoint
   function routeToApi(viewPath) {
     const qIndex = viewPath.indexOf('?');
     const pathname = qIndex >= 0 ? viewPath.slice(0, qIndex) : viewPath;
     const search = qIndex >= 0 ? viewPath.slice(qIndex) : '';
 
-    if (pathname === '/' || pathname === '/view' || pathname === '/view/' || pathname === '/view/home') {
-      return '/home';
+    // Home
+    if (
+      pathname === '/' ||
+      pathname === '/view' ||
+      pathname === '/view/' ||
+      pathname === '/view/home'
+    ) {
+      return '/home' + (search || '');
     }
 
-    // support short form: /view/<slug> -> /lesson/by/<slug>
-    const mShort = pathname.match(/^\/view\/([a-z0-9-]+)\/?$/i);
-    if (mShort) {
-      return `/lesson/by/${encodeURIComponent(mShort[1])}${search}`;
-    }
-
-    const m = pathname.match(/^\/view\/lesson\/(\d+)\/?$/);
+    // Lesson by numeric id
+    let m = pathname.match(/^\/view\/lesson\/(\d+)\/?$/);
     if (m) {
       return `/lesson/${m[1]}${search}`;
     }
+
+    // Lesson by slug
     const mSlug = pathname.match(/^\/view\/lesson\/slug\/([^\/]+)\/?$/);
     if (mSlug) {
       return `/lesson/by/${encodeURIComponent(mSlug[1])}${search}`;
@@ -186,13 +153,61 @@
       return `/lesson/by/${encodeURIComponent(mBy[1])}${search}`;
     }
 
-    if (pathname.startsWith('/view/')) {
-      const tail = pathname.replace(/^\/view\//, '');
-      return `/ui/pages/${tail}.json`;
+    // Explicit page alias: /view/page/<name> -> /page/<name>
+    const mPage = pathname.match(/^\/view\/page\/([^\/]+)\/?$/);
+    if (mPage) {
+      return `/page/${encodeURIComponent(mPage[1])}${search}`;
     }
 
-    // direct API path fallback (e.g. /home or /lesson/2?i=1)
-    return viewPath;
+    // Generic: anything under /view/*
+    if (pathname.startsWith('/view/')) {
+      const tail = pathname.replace(/^\/view\//, '');
+      // If user typed "/view/ui/pages/xxx.json" don't add ".json" again
+      if (tail.startsWith('ui/')) {
+        return `/${tail}${search}`;
+      }
+      // If tail already ends with .json, don't double-append
+      if (tail.endsWith('.json')) {
+        return `/ui/pages/${tail}${search}`;
+      }
+      // Normal case: "/view/test" -> "/ui/pages/test.json"
+      return `/ui/pages/${tail}.json${search}`;
+    }
+
+    return viewPath; // direct API path
+  }
+
+  function parseViewLesson(viewPath) {
+    // /view/lesson/2?i=1 -> { id:2, i:1 }
+    const url = new URL(viewPath, location.origin);
+    const m = url.pathname.match(/^\/view\/lesson\/(\d+)\/?$/);
+    if (!m) return null;
+    const id = Number(m[1]);
+    const i = url.searchParams.has('i') ? Number(url.searchParams.get('i')) : 0;
+    return { id, i };
+  }
+
+  function parseViewLessonSlug(viewPath) {
+    const url = new URL(viewPath, location.origin);
+    const m = url.pathname.match(/^\/view\/lesson\/slug\/([^\/]+)\/?$/);
+    if (!m) return null;
+    const slug = decodeURIComponent(m[1]);
+    const i = url.searchParams.has('i') ? Number(url.searchParams.get('i')) : 0;
+    return { slug, i };
+  }
+
+  function nextViewUrl(viewPath) {
+    const pId = parseViewLesson(viewPath);
+    if (pId) {
+      const nextI = (pId.i ?? 0) + 1;
+      return `/view/lesson/${pId.id}?i=${nextI}`;
+    }
+    const pSlug = parseViewLessonSlug(viewPath);
+    if (pSlug) {
+      const nextI = (pSlug.i ?? 0) + 1;
+      return `/view/lesson/slug/${encodeURIComponent(pSlug.slug)}?i=${nextI}`;
+    }
+    return null;
   }
 
   async function fetchCard(viewPath) {
@@ -202,12 +217,11 @@
 
     // prefetch next step for lessons
     const nextView = nextViewUrl(viewPath);
-    if (nextView) {
-      preloadViewUrl(nextView);
-    }
+    if (nextView) preloadViewUrl(nextView);
   }
 
   function render(json) {
+    currentJson = json;
     const DivKit = window.Ya && window.Ya.DivKit;
     if (!DivKit) {
       root.textContent = 'DivKit bundle не найден. Проверь подключение Ya.DivKit.';
@@ -222,21 +236,78 @@
         json,
         onError: (e) => console.error('DivKit error:', e),
         onAction: handleAction,
-        onStat: handleAction, // обратная совместимость
+        onStat: handleAction,
       });
     } else {
       div.setData(json);
     }
   }
 
-  // ------------------------- navigation handlers --------------------------
+  // ---- fallback: switch state by mutating JSON when SDK setState is unavailable
+  function setStateInJson(targetId, stateId) {
+    try {
+      if (!currentJson) return false;
+      const clone = structuredClone(currentJson);
+      let found = false;
+      (function walk(n) {
+        if (!n || typeof n !== 'object') return;
+        if (Array.isArray(n)) { n.forEach(walk); return; }
+        if (n.type === 'state' && (n.id === targetId || (!n.id && targetId === 'lesson_card_state'))) {
+          n.state_id = stateId;
+          n._rev = (n._rev || 0) + 1; // provoke rerender
+          found = true;
+          return;
+        }
+        Object.values(n).forEach(walk);
+      })(clone);
+      if (!found) return false;
+      currentJson = clone;
+      if (div && typeof div.setData === 'function') {
+        div.setData(clone);
+      }
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  function applyStateChange(targetId, next) {
+    // try several SDK signatures, fall back to JSON mutation
+    try {
+      if (div && typeof div.setState === 'function') {
+        try { div.setState({ id: targetId, state_id: next }); return true; } catch (_) {}
+        try { div.setState({ id: targetId, stateId: next });  return true; } catch (_) {}
+        try { div.setState(targetId, next);                   return true; } catch (_) {}
+      }
+    } catch (_) {}
+    return setStateInJson(targetId, next);
+  }
+
+  // ------------------------- navigation & actions -------------------------
   async function handleAction(evt) {
     try {
       const a = extractAction(evt) || evt?.action || evt;
       if (!a) return false;
       postLog(a);
 
-      // semantic actions
+      // 1) generic state change (supports both a.set_state and a.payload.set_state)
+      const maybeSet = a.set_state || a?.payload?.set_state;
+      if (maybeSet && typeof maybeSet === 'object') {
+        const targetId = maybeSet.id || maybeSet.component_id || 'lesson_card_state';
+        const next = maybeSet.state_id ?? maybeSet.stateId ?? maybeSet.state ?? 'brand';
+        applyStateChange(targetId, next);
+        return true;
+      }
+
+      // 2) legacy custom action by log_id
+      if (a.log_id === 'lesson_card_set_state') {
+        const targetId = a?.payload?.id || 'lesson_card_state';
+        const next = a?.payload?.state_id ?? a?.payload?.stateId ?? 'brand';
+        applyStateChange(targetId, next);
+        return true;
+      }
+
+      // 3) semantic navigation
       if (a.log_id === 'go_home') {
         await go('/view/home');
         return true;
@@ -254,7 +325,7 @@
         }
       }
 
-      // url-based actions (support /lesson/.. and /home)
+      // 4) url-based navigation
       const url = resolveUrlLike(a) || resolveUrlLike(a?.payload);
       if (url) {
         let viewUrl = url;

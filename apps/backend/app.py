@@ -32,10 +32,56 @@ def index():
 def client_js():
     return send_from_directory(WEB_DIR, "client.js", mimetype="application/javascript")
 
+
 # Раздача ассетов из ui/
 @app.get("/ui/<path:filename>")
 def ui_static(filename: str):
     return send_from_directory(UI_DIR, filename)
+
+# Generic resolved UI page: /page/<name> (with $include and tokens applied)
+@app.get("/page/<path:page_name>")
+def get_ui_page(page_name: str):
+    """Return a UI page from /ui/pages with $include resolved.
+    Accepts names with or without .json, e.g.: /page/test or /page/test.json
+    """
+    if page_name.endswith('.json'):
+        page_name = page_name[:-5]
+    raw_path = (UI_DIR / 'pages' / f"{page_name}.json").resolve()
+
+    # Security: ensure path stays within /ui/pages
+    try:
+        inside = raw_path.is_relative_to(UI_DIR / 'pages')
+    except AttributeError:
+        inside = str(raw_path).startswith(str(UI_DIR / 'pages'))
+
+    if not inside or not raw_path.exists():
+        # Minimal placeholder card to show in DivKit shell
+        return jsonify({
+            "card": {
+                "log_id": page_name or "page",
+                "states": [
+                    {
+                        "div": {
+                            "type": "container",
+                            "items": [
+                                {
+                                    "type": "text",
+                                    "text": f"page '{page_name}' not found",
+                                    "text_alignment_horizontal": "center",
+                                    "paddings": {"top": 16, "bottom": 16},
+                                }
+                            ]
+                        }
+                    }
+                ]
+            }
+        })
+
+    with open(raw_path, 'r', encoding='utf-8') as f:
+        card = json.load(f)
+    card = _resolve_includes(card)
+    card = _apply_design_tokens(card, _load_tokens("light"))
+    return jsonify(card)
 
 # SPA deep-link support: любые пути под /view/* возвращают shell (index.html)
 @app.get("/view")
@@ -55,35 +101,97 @@ def view_lesson_slug(slug: str):  # noqa: ARG001
 
 # ---------------- Include resolver ----------------
 
+def _is_strict_includes() -> bool:
+    """STRICT_INCLUDES=1 makes $include hard-fail. Otherwise we render a placeholder."""
+    return str(os.getenv("STRICT_INCLUDES", "")).lower() in ("1", "true", "yes", "on")
+
+
+def _missing_component_node(path: "Path|str") -> Dict[str, Any]:
+    """Lightweight placeholder node to keep layout intact when include is missing."""
+    return {
+        "type": "container",
+        "width": {"type": "match_parent"},
+        "items": [
+            {
+                "type": "text",
+                "text_alignment_horizontal": "center",
+                "paddings": {"top": 8, "bottom": 8},
+                "text": f"Компонент не найден: {path}",
+            }
+        ],
+        "background": [{"type": "solid", "color": "#FFF0B3"}],
+        "border": {"corner_radius": 8},
+        "margins": {"top": 4, "bottom": 4},
+    }
+
+
 def _resolve_includes(node: Any, *, base_dir: Optional[Path] = None) -> Any:
     """
-    Разворачивает {"$include": "components/xxx.json"}.
-    Пути без "/" трактуются относительно base_dir, с "components/" или "pages/" — от корня UI_DIR.
-    Не даём выйти за пределы UI_DIR.
+    Разворачивает include-узлы.
+
+    Поддерживаются ключи:
+      - "$include": жёсткий include при STRICT_INCLUDES=1, иначе мягкий (с плейсхолдером).
+      - "$include_optional": всегда мягкий include (никогда не роняет страницу).
+
+    Пути без начального "/" трактуются относительно base_dir.
+    Пути, начинающиеся с "components/" или "pages/", трактуются от корня UI_DIR.
+
+    Доп. миграционная логика:
+      - Если запрошен "components/<name>.json", но файла нет, пробуем
+        "components/header/<name>.json" (перенос хедера в поддиректорию).
     """
     if base_dir is None:
         base_dir = UI_DIR
 
-    if isinstance(node, dict):
-        if "$include" in node and isinstance(node["$include"], str):
-            inc_str = node["$include"].lstrip("/")
-            if inc_str.startswith(("components/", "pages/")):
-                inc_path = (UI_DIR / inc_str).resolve()
-            else:
-                inc_path = (base_dir / inc_str).resolve()
+    def _resolve_one(inc_key: str, inc_value: str) -> Any:
+        soft = (inc_key == "$include_optional") or not _is_strict_includes()
 
-            # безопасность: не выходим за пределы UI_DIR
-            try:
-                inside = inc_path.is_relative_to(UI_DIR)  # py3.9+
-            except AttributeError:
-                inside = str(inc_path).startswith(str(UI_DIR))
-            if not inside:
-                raise ValueError(f"$include path escapes UI dir: {inc_path}")
+        inc_str = inc_value.lstrip("/")
+        # Базовый путь
+        if inc_str.startswith(("components/", "pages/")):
+            inc_path = (UI_DIR / inc_str).resolve()
+        else:
+            inc_path = (base_dir / inc_str).resolve()
 
+        # Безопасность: не выходим за пределы UI_DIR
+        try:
+            inside = inc_path.is_relative_to(UI_DIR)  # py3.9+
+        except AttributeError:
+            inside = str(inc_path).startswith(str(UI_DIR))
+        if not inside:
+            if soft:
+                print(f"[include] blocked path (outside UI): {inc_path}")
+                return _missing_component_node(inc_value)
+            raise ValueError(f"$include path escapes UI dir: {inc_path}")
+
+        # Если файла нет — пробуем миграционный путь для header/*
+        if not inc_path.exists() and inc_str.startswith("components/"):
+            base_name = inc_path.name  # hearts_widget.json
+            alt_path = (UI_DIR / "components" / "header" / base_name).resolve()
+            if alt_path.exists():
+                inc_path = alt_path
+
+        try:
             with open(inc_path, "r", encoding="utf-8") as f:
                 loaded = json.load(f)
             return _resolve_includes(loaded, base_dir=inc_path.parent)
+        except Exception as e:
+            # Мягкий режим — подставляем плейсхолдер
+            if soft:
+                print(f"[include] warning for '{inc_value}': {e} -> placeholder")
+                return _missing_component_node(inc_value)
+            # Жёсткий режим — пробрасываем ошибку
+            raise
 
+    # --- Рекурсивный обход ---
+    if isinstance(node, dict):
+        # Обработка include-узлов
+        if "$include" in node and isinstance(node["$include"], str):
+            return _resolve_one("$include", node["$include"])
+        if "$include_optional" in node and isinstance(node["$include_optional"], str):
+            return _resolve_one("$include_optional", node["$include_optional"])
+
+        # Обычный словарь — обходим рекурсивно
         return {k: _resolve_includes(v, base_dir=base_dir) for k, v in node.items()}
 
     if isinstance(node, list):
@@ -365,7 +473,7 @@ def get_lesson_by_slug_alias(slug: str):
 # slug looks safe and doesn't collide with known routes.
 RESERVED_SLUGS = {
     "", "client.js", "ui", "view", "lesson", "home", "log",
-    "favicon.ico", "index.html", "static"
+    "favicon.ico", "index.html", "static", "test", "page"
 }
 
 @app.get("/<string:slug>")
@@ -535,6 +643,7 @@ def get_lesson(lesson_id: int):
     return jsonify(card)
 
 
+
 @app.get("/home")
 def get_home():
     """Отдаём home + подменяем узел id="home_tabs" на данные из Strapi (если доступны)."""
@@ -554,6 +663,46 @@ def get_home():
         print("Build home tabs failed:", e)
 
     return jsonify(card)
+
+
+# ----------- Test preview page for component development -----------
+@app.get("/test")
+def get_test():
+    """
+    Preview page for developing components.
+    Returns resolved /ui/pages/test.json with includes and tokens applied.
+    If the file is missing or invalid, returns a tiny placeholder card.
+    """
+    page_path = UI_DIR / "pages" / "test.json"
+    try:
+        with open(page_path, "r", encoding="utf-8") as f:
+            card = json.load(f)
+        card = _resolve_includes(card)
+        card = _apply_design_tokens(card, _load_tokens("light"))
+        return jsonify(card)
+    except Exception as e:
+        print("TEST page load error:", e)
+        # Minimal placeholder card to show in DivKit shell
+        return jsonify({
+            "card": {
+                "log_id": "test",
+                "states": [
+                    {
+                        "div": {
+                            "type": "container",
+                            "items": [
+                                {
+                                    "type": "text",
+                                    "text": "test.json не найден",
+                                    "text_alignment_horizontal": "center",
+                                    "paddings": {"top": 16, "bottom": 16}
+                                }
+                            ]
+                        }
+                    }
+                ]
+            }
+        })
 
 
 @app.post("/log")
