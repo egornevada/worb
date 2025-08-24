@@ -12,10 +12,12 @@
   "pluginOptions": {},
   "attributes": {
     "term": {
-      "type": "string"
+      "type": "string",
+      "required": true
     },
     "translation": {
-      "type": "string"
+      "type": "string",
+      "required": true
     },
     "image": {
       "type": "media",
@@ -35,6 +37,16 @@
       "relation": "manyToOne",
       "target": "api::lesson.lesson",
       "inversedBy": "words"
+    },
+    "level": {
+      "type": "enumeration",
+      "required": false,
+      "default": "A1-A2",
+      "enum": [
+        "A1-A2",
+        "B1-B2",
+        "C1"
+      ]
     }
   }
 }

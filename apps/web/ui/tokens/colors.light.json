@@ -1,0 +1,15 @@
+{
+  "color": {
+    "page_bg": "#FFFFFF",
+    "brand": "#46B100",
+    "background": "#F5F5F5",
+    "foreground": "#424242",
+    "foreground_inverse": "#FFFFFF",
+    "stroke": "#EEEEEE",
+    "bad": "#FF4B4C",
+    "background_disable": "#DBDBDB",
+    "foreground_disable": "#B2B2B2",
+    "background_brand": "#E3F3D9",
+    "background_bad": "#FFDBDB"
+  }
+}

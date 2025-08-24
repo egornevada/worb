@@ -42,10 +42,5 @@
                     },
                     "corner_radius": 16
                   },
-                  "background": [
-                    {
-                      "type": "solid",
-                      "color": "#eeeeee"
-                    }
-                  ]
+                  "background": "@color.background"
                 }

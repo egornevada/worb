@@ -1,0 +1,46 @@
+{
+  "type": "container",
+  "width": {
+    "type": "fixed",
+    "value": 48
+  },
+  "height": {
+    "type": "fixed",
+    "value": 48
+  },
+  "alignment_horizontal": "center",
+  "alignment_vertical": "center",
+  "items": [
+    {
+      "type": "image",
+      "image_url": "/ui/icons/IC_LikeFill.svg",
+      "width": {
+        "type": "fixed",
+        "value": 24
+      },
+      "height": {
+        "type": "fixed",
+        "value": 24
+      },
+      "content_mode": "scale_to_fit",
+      "preload_required": true,
+      "alignment_horizontal": "center",
+      "alignment_vertical": "center",
+      "tint_color": "@color.bad"
+    },
+    {
+      "type": "text",
+      "text": "0",
+      "width": {
+        "type": "wrap_content"
+      },
+      "alignment_horizontal": "center",
+      "font_size": 12,
+      "line_height": 16,
+      "font_weight": "bold",
+      "text_color": "@color.bad"
+    }
+  ],
+  "content_alignment_horizontal": "center",
+  "content_alignment_vertical": "center"
+}

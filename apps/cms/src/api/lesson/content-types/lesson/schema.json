@@ -16,7 +16,8 @@
     },
     "slug": {
       "type": "uid",
-      "targetField": "title"
+      "targetField": "title",
+      "required": true
     },
     "cover": {
       "type": "media",
@@ -33,6 +34,12 @@
       "relation": "oneToMany",
       "target": "api::word.word",
       "mappedBy": "lesson"
+    },
+    "category": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::category.category",
+      "inversedBy": "lessons"
     }
   }
 }

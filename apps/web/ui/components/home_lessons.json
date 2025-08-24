@@ -1,0 +1,22 @@
+{
+  "type": "tabs",
+  "id": "home_tabs",
+  "height": { "type": "wrap_content" },
+  "tab_title_style": { "animation_type": "slide" },
+  "items": [
+    {
+      "title": "Загрузка…",
+      "div": {
+        "type": "tab_container",
+        "items": [
+          {
+            "type": "text",
+            "text": "Загрузка категорий…",
+            "text_alignment_horizontal": "center",
+            "paddings": { "top": 24, "bottom": 24 }
+          }
+        ]
+      }
+    }
+  ]
+}

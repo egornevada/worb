@@ -1,3 +1,4 @@
+# apps/backend/strapi_client.py
 from __future__ import annotations
 
 import os
@@ -6,16 +7,15 @@ from typing import Any, Dict, List, Optional
 import requests
 from dotenv import load_dotenv
 
-# Load environment variables once
+# ---- env / base config -------------------------------------------------------
 load_dotenv()
 
-# Base config
 STRAPI_URL: str = os.getenv("STRAPI_URL", "http://localhost:1337").rstrip("/")
-# Accept either STRAPI_TOKEN or STRAPI_API_TOKEN
+# Поддержим и STRAPI_TOKEN, и STRAPI_API_TOKEN
 STRAPI_TOKEN: Optional[str] = os.getenv("STRAPI_TOKEN") or os.getenv("STRAPI_API_TOKEN")
 
-# Shared requests session
 _session = requests.Session()
+_session.headers.setdefault("Accept", "application/json")
 if STRAPI_TOKEN:
     _session.headers.update({
         "Authorization": f"Bearer {STRAPI_TOKEN}",
@@ -23,128 +23,225 @@ if STRAPI_TOKEN:
     })
 
 
+# ---- helpers -----------------------------------------------------------------
 def _get(path: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
-    """Helper to GET from Strapi and return JSON (raises on HTTP errors)."""
+    """GET в Strapi + .json() (бросает HTTPError на 4xx/5xx)."""
     url = f"{STRAPI_URL}{path if path.startswith('/') else '/' + path}"
-    r = _session.get(url, params=params)
+    r = _session.get(url, params=params, timeout=15)
     r.raise_for_status()
     return r.json()
 
+def _abs_url(url: Optional[str]) -> str:
+    """Сделать url абсолютным, если начинается с '/'."""
+    if not url:
+        return ""
+    return f"{STRAPI_URL}{url}" if isinstance(url, str) and url.startswith("/") else url
 
+def _attrs(node: Any) -> Dict[str, Any]:
+    """Вернуть attributes для v4 ({data:{attributes}}) и v5 (плоская)."""
+    if not isinstance(node, dict):
+        return {}
+    if "data" in node and isinstance(node.get("data"), dict):
+        # v4 relation/media
+        return (node.get("data") or {}).get("attributes") or {}
+    # v5
+    return node.get("attributes") or node
+
+def _media_url(node: Any) -> str:
+    """Достать url из media (v4/v5) и вернуть абсолютный."""
+    if not node or not isinstance(node, dict):
+        return ""
+    url = node.get("url") or (node.get("attributes") or {}).get("url")
+    if not url and "data" in node:
+        inner = node.get("data") or {}
+        if isinstance(inner, dict):
+            url = (inner.get("attributes") or {}).get("url")
+    return _abs_url(url)
+
+
+# ---- lessons -----------------------------------------------------------------
 def get_lesson(lesson_id: int) -> Dict[str, Any]:
-    """Fetch one lesson by numeric id, with cover and words populated.
-    Returns the *entry object* (not wrapped), i.e. shape compatible with `to_divkit_lesson`.
-    """
+    """Урок по id (title, slug, cover, category, words с image+level)."""
     params = {
-        # Note: `$eq` is the correct operator key
         "filters[id][$eq]": lesson_id,
-        # Populate cover media and words (+word image)
-        "populate[0]": "cover",
-        "populate[1]": "words",
-        "populate[2]": "words.image",
-        # We expect exactly one match
         "pagination[pageSize]": 1,
+
+        "fields[0]": "title",
+        "fields[1]": "slug",
+
+        "populate[cover]": "true",
+        "populate[category]": "true",
+
+        "populate[words][fields][0]": "term",
+        "populate[words][fields][1]": "translation",
+        "populate[words][fields][2]": "distractor1",
+        "populate[words][fields][3]": "level",
+        "populate[words][populate]": "image",
     }
     data = _get("/api/lessons", params=params)
     items = data.get("data") or []
     if not items:
         raise LookupError(f"Lesson id={lesson_id} not found")
-    # Strapi v5 returns an object directly in the list
     return items[0]
 
-
 def get_lesson_by_slug(slug: str) -> Optional[Dict[str, Any]]:
-    """Fetch one lesson by slug (first match), with relations populated."""
+    """Урок по slug (те же populate)."""
     params = {
         "filters[slug][$eq]": slug,
-        "populate[0]": "cover",
-        "populate[1]": "words",
-        "populate[2]": "words.image",
         "pagination[pageSize]": 1,
+
+        "fields[0]": "title",
+        "fields[1]": "slug",
+
+        "populate[cover]": "true",
+        "populate[category]": "true",
+
+        "populate[words][fields][0]": "term",
+        "populate[words][fields][1]": "translation",
+        "populate[words][fields][2]": "distractor1",
+        "populate[words][fields][3]": "level",
+        "populate[words][populate]": "image",
     }
     data = _get("/api/lessons", params=params)
     items = data.get("data") or []
     return items[0] if items else None
 
-
 def to_divkit_lesson(lesson_entry: Dict[str, Any]) -> Dict[str, Any]:
-    """Convert a Strapi lesson entry (with populated relations) to a compact
-    structure that our Flask routes can further map into DivKit JSON.
-
-    Supports both Strapi v4 shape (entry['attributes'] + media under .data.attributes)
-    and Strapi v5 shape (attributes flattened at top-level, media/relations returned directly).
-    """
-    # Strapi may return either a wrapped object (v4) or a plain entry (v5)
+    """Превратить entry из Strapi в компактный словарь для DivKit."""
     entry = lesson_entry.get("data") if isinstance(lesson_entry, dict) and "data" in lesson_entry else lesson_entry
     if not entry:
-        return {}
+        return {"words": []}
 
-    # In v4, attributes live under entry["attributes"]. In v5 they're flattened.
-    attrs = entry.get("attributes") or entry
+    attrs = entry.get("attributes") or entry  # v4 vs v5
 
-    # --- Cover image URL ---
-    cover_url: Optional[str] = None
-    cover = attrs.get("cover")
-    if isinstance(cover, dict):
-        # v5: cover is a dict with `url` (or occasionally nested under `attributes`)
-        cover_url = cover.get("url") or cover.get("attributes", {}).get("url")
-        # v4: cover is { data: { attributes: { url } } }
-        if not cover_url and "data" in cover:
-            cover_url = (cover.get("data") or {}).get("attributes", {}).get("url")
+    cover_url = _media_url(attrs.get("cover"))
 
-    # --- Related words ---
-    words: List[Dict[str, Any]] = []
-    rel = attrs.get("words")
-    # v5: populated many-to-many returns a list of word entries
-    # v4: populated relation returns { data: [ ... ] }
-    if isinstance(rel, list):
-        rel_items = rel
-    elif isinstance(rel, dict):
-        rel_items = rel.get("data") or []
+    cat_node = attrs.get("category")
+    cat_attrs = _attrs(cat_node) if cat_node else {}
+    category = {
+        "title": (cat_attrs.get("title") or "").strip() if isinstance(cat_attrs, dict) else "",
+        "slug": (cat_attrs.get("slug") or "").strip() if isinstance(cat_attrs, dict) else "",
+        "order": cat_attrs.get("order") if isinstance(cat_attrs, dict) else 0,
+        "icon_url": _media_url(cat_attrs.get("icon")) if isinstance(cat_attrs, dict) else "",
+    }
+
+    # words
+    words_rel = attrs.get("words") or {}
+    if isinstance(words_rel, list):
+        rel_items = words_rel
+    elif isinstance(words_rel, dict):
+        rel_items = words_rel.get("data") or []
     else:
         rel_items = []
 
+    words: List[Dict[str, Any]] = []
     for w in rel_items:
-        wa = w.get("attributes") or w  # v4 vs v5
-        # word image (optional)
-        image_url: Optional[str] = None
-        img = wa.get("image")
-        if isinstance(img, dict):
-            image_url = img.get("url") or img.get("attributes", {}).get("url")
-            if not image_url and "data" in img:
-                image_url = (img.get("data") or {}).get("attributes", {}).get("url")
+        wa = _attrs(w)
         words.append({
-            "term": wa.get("term"),
-            "translation": wa.get("translation"),
-            "distractor1": wa.get("distractor1"),
-            "image_url": image_url,
+            "term": (wa.get("term") or "").strip(),
+            "translation": (wa.get("translation") or "").strip(),
+            "distractor1": (wa.get("distractor1") or "").strip(),
+            "level": (wa.get("level") or "").strip(),
+            "image_url": _media_url(wa.get("image")),
         })
 
     return {
         "id": entry.get("id"),
-        "title": attrs.get("title"),
-        "slug": attrs.get("slug"),
+        "title": (attrs.get("title") or "").strip(),
+        "slug": (attrs.get("slug") or "").strip(),
         "cover_url": cover_url,
+        "category": category,
         "words": words,
     }
 
 
+# ---- categories (для Home) ---------------------------------------------------
+def get_categories() -> Dict[str, Any]:
+    """Сырые категории из Strapi с нужными полями (для внутреннего использования)."""
+    params = {
+        "fields[0]": "title",
+        "fields[1]": "slug",
+        "fields[2]": "order",
+        "populate[icon]": "true",
+
+        "populate[lessons][fields][0]": "title",
+        "populate[lessons][fields][1]": "slug",
+        "populate[lessons][populate]": "cover",
+
+        "sort[0]": "order:asc",
+        "pagination[pageSize]": 100,
+    }
+    return _get("/api/categories", params=params)
+
+def list_categories_with_lessons() -> List[Dict[str, Any]]:
+    """Готовые категории для Home (устойчивая форма, абсолютные URL)."""
+    raw = get_categories()
+    data = raw.get("data") or []
+
+    categories: List[Dict[str, Any]] = []
+
+    for item in data:
+        # v4: {id, attributes:{...}}, v5: плоская
+        if not isinstance(item, dict):
+            continue
+        attrs = item.get("attributes") or item
+
+        icon_url = _media_url(attrs.get("icon"))
+        title = (attrs.get("title") or "").strip()
+        slug = (attrs.get("slug") or "").strip()
+        order = attrs.get("order") or 0
+
+        # lessons relation
+        lessons_rel = attrs.get("lessons") or {}
+        if isinstance(lessons_rel, list):
+            lesson_nodes = lessons_rel
+        elif isinstance(lessons_rel, dict):
+            lesson_nodes = lessons_rel.get("data") or []
+        else:
+            lesson_nodes = []
+
+        lessons: List[Dict[str, Any]] = []
+        for ln in lesson_nodes:
+            la = _attrs(ln)
+            lessons.append({
+                "id": ln.get("id") if isinstance(ln, dict) else None,
+                "title": (la.get("title") or "").strip(),
+                "slug": (la.get("slug") or "").strip(),
+                "cover_url": _media_url(la.get("cover")),
+            })
+
+        categories.append({
+            "id": item.get("id") if isinstance(item, dict) else None,
+            "title": title,
+            "slug": slug,
+            "order": order,
+            "icon_url": icon_url,
+            "lessons": lessons,
+        })
+
+    # финальная сортировка на всякий пожарный
+    categories.sort(key=lambda c: (c.get("order") or 0, c.get("title") or ""))
+    return categories
+
+
+# ---- tiny manual test --------------------------------------------------------
 if __name__ == "__main__":
-    # Simple manual test runner
+    # Запуск: TEST_LESSON_ID=2 python strapi_client.py
     test_id = os.getenv("TEST_LESSON_ID")
     test_slug = os.getenv("TEST_LESSON_SLUG")
 
     try:
         if test_id:
             raw = get_lesson(int(test_id))
+            from pprint import pprint
+            print("Lesson ok"); pprint(to_divkit_lesson(raw))
         elif test_slug:
             raw = get_lesson_by_slug(test_slug) or {}
+            from pprint import pprint
+            print("Lesson by slug ok"); pprint(to_divkit_lesson(raw))
         else:
-            raise SystemExit("Set TEST_LESSON_ID or TEST_LESSON_SLUG to test.")
-
-        print("Raw lesson keys:", list((raw or {}).keys()))
-        simplified = to_divkit_lesson(raw)
-        import json
-        print(json.dumps(simplified, ensure_ascii=False, indent=2))
+            cats = list_categories_with_lessons()
+            from pprint import pprint
+            print("Categories ok"); pprint(cats[:2])
     except Exception as e:
         print("Strapi client test failed:", e)

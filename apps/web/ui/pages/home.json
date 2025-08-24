@@ -7,21 +7,36 @@
         "div": {
           "type": "container",
           "orientation": "vertical",
-          "width": { "type": "match_parent" },
-          "paddings": { "top": 16, "bottom": 24 },
+          "width": {
+            "type": "match_parent"
+          },
+          "paddings": {
+            "top": 16,
+            "bottom": 24
+          },
           "items": [
             {
               "type": "container",
               "orientation": "vertical",
-              "width": { "type": "match_parent" },
-              "height": { "type": "wrap_content" },
+              "width": {
+                "type": "match_parent"
+              },
+              "height": {
+                "type": "wrap_content"
+              },
               "items": [
                 {
                   "type": "container",
-                  "width": { "type": "match_parent" },
-                  "height": { "type": "wrap_content" },
+                  "width": {
+                    "type": "match_parent"
+                  },
+                  "height": {
+                    "type": "wrap_content"
+                  },
                   "items": [
-                    { "$include": "/components/header.json" }
+                    {
+                      "$include": "/components/header/header.json"
+                    }
                   ]
                 },
 
@@ -51,7 +66,6 @@
                     }
                   ],
                   "content_alignment_horizontal": "center",
-                  
                   "content_alignment_vertical": "bottom",
                   "paddings": {
                     "top": 8,
@@ -60,24 +74,45 @@
                     "left": 8
                   }
                 },
-
                 {
                   "type": "container",
-                  "width": { "type": "match_parent" },
-                  "paddings": { "top": 8, "left": 16, "right": 16 },
+                  "width": {
+                    "type": "match_parent"
+                  },
+                  "paddings": {
+                    "top": 8,
+                    "left": 16,
+                    "right": 16
+                  },
                   "items": [
                     {
                       "type": "container",
-                      "width": { "type": "match_parent" },
-                      "height": { "type": "fixed", "value": 44 },
-                      "background": [{ "type": "solid", "color": "#1a73e8" }],
-                      "border": { "corner_radius": 12 },
+                      "width": {
+                        "type": "match_parent"
+                      },
+                      "height": {
+                        "type": "fixed",
+                        "value": 44
+                      },
+                      "background": [
+                        {
+                          "type": "solid",
+                          "color": "#1a73e8"
+                        }
+                      ],
+                      "border": {
+                        "corner_radius": 12
+                      },
                       "items": [
                         {
                           "type": "text",
                           "text": "Начать",
-                          "width": { "type": "match_parent" },
-                          "height": { "type": "match_parent" },
+                          "width": {
+                            "type": "match_parent"
+                          },
+                          "height": {
+                            "type": "match_parent"
+                          },
                           "text_alignment_horizontal": "center",
                           "text_alignment_vertical": "center",
                           "text_color": "#FFFFFF",
@@ -85,66 +120,23 @@
                         }
                       ],
                       "action": {
-  "log_id": "start_lesson",
-  "url": "/view/lesson/2?i=0"
-}
+                        "log_id": "start_lesson",
+                        "url": "/view/lesson/2?i=0"
+                      }
                     }
                   ]
                 },
                 {
                   "type": "container",
-                  "width": { "type": "match_parent" },
-                  "height": { "type": "wrap_content" },
+                  "width": {
+                    "type": "match_parent"
+                  },
+                  "height": {
+                    "type": "wrap_content"
+                  },
                   "items": [
                     {
-                      "type": "container",
-                      "width": { "type": "match_parent" },
-                      "action": {
-                        "log_id": "open_lesson",
-                        "url": "#open_lesson",
-                        "payload": { "lesson_id": "1" }
-                      },
-                      "items": [ { "$include": "/components/tst-level-true.json" } ]
-                    },
-                    {
-                      "type": "container",
-                      "width": { "type": "match_parent" },
-                      "action": {
-                        "log_id": "open_lesson",
-                        "url": "#open_lesson",
-                        "payload": { "lesson_id": "1" }
-                      },
-                      "items": [ { "$include": "/components/tst-level-false.json" } ]
-                    },
-                    {
-                      "type": "container",
-                      "width": { "type": "match_parent" },
-                      "action": {
-                        "log_id": "open_lesson",
-                        "url": "#open_lesson",
-                        "payload": { "lesson_id": "1" }
-                      },
-                      "items": [ { "$include": "/components/tst-level-false.json" } ]
-                    },
-                    {
-                      "type": "container",
-                      "width": { "type": "match_parent" },
-                      "action": {
-                        "log_id": "open_lesson",
-                        "url": "#open_lesson",
-                        "payload": { "lesson_id": "1" }
-                      },
-                      "items": [ { "$include": "/components/tst-level-false.json" } ]
-                    },
-                    {
-                      "type": "container",
-                      "width": { "type": "match_parent" },
-                      "action": {
-                        "log_id": "open_lesson",
-                        "url": "#open_lesson",
-                        "payload": { "lesson_id": "1" }
-                      },
-                      "items": [ { "$include": "/components/tst-level-false.json" } ]
+                      "$include": "/components/home_lessons.json"
                     }
                   ],
                   "paddings": {
@@ -154,7 +146,6 @@
                     "left": 8
                   }
                 }
-                
               ]
             }
           ]
