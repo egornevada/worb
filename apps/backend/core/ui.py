@@ -1,6 +1,7 @@
 from __future__ import annotations
 from pathlib import Path
 from typing import Any, Dict, List, Optional
+from copy import deepcopy
 import json
 import os
 
@@ -45,6 +46,20 @@ def apply_design_tokens(node: Any, tokens: Dict[str, Any]) -> Any:
 
 # ---------- helpers: includes ----------
 
+def _safe_join(base: Path, rel: str) -> Path:
+    p = (base / rel.lstrip("/")).resolve()
+    try:
+        inside = p.is_relative_to(UI_DIR)  # py3.9+
+    except AttributeError:
+        inside = str(p).startswith(str(UI_DIR))
+    if not inside:
+        raise ValueError(f"$include outside UI: {p}")
+    return p
+
+def _load_json(path: Path) -> Any:
+    with open(path, "r", encoding="utf-8") as f:
+        return json.load(f)
+
 def _missing_component_node(path: "Path|str") -> Dict[str, Any]:
     return {
         "type": "container",
@@ -67,51 +82,162 @@ def resolve_includes(node: Any, *, base_dir: Optional[Path] = None) -> Any:
     if base_dir is None:
         base_dir = UI_DIR
 
-    def _resolve_one(inc_key: str, inc_value: str) -> Any:
+    def _resolve_from_spec(inc_key: str, spec: Any) -> Any:
         soft = (inc_key == "$include_optional") or not _strict_includes()
-        inc_str = inc_value.lstrip("/")
-        if inc_str.startswith(("components/", "pages/")):
-            inc_path = (UI_DIR / inc_str).resolve()
-        else:
-            inc_path = (base_dir / inc_str).resolve()
 
-        try:
-            inside = inc_path.is_relative_to(UI_DIR)  # py3.9+
-        except AttributeError:
-            inside = str(inc_path).startswith(str(UI_DIR))
-        if not inside:
-            return _missing_component_node(inc_value) if soft else (_ for _ in ()).throw(
-                ValueError(f"$include outside UI: {inc_path}")
-            )
+        # Case 1: string include
+        if isinstance(spec, str):
+            inc_str = spec.lstrip("/")
+            if inc_str.startswith(("components/", "pages/")):
+                inc_path = _safe_join(UI_DIR, inc_str)
+            else:
+                inc_path = _safe_join(base_dir, inc_str)
 
-        if not inc_path.exists() and inc_str.startswith("components/"):
-            # миграционное правило: components/header/*
-            alt = (UI_DIR / "components" / "header" / inc_path.name).resolve()
-            if alt.exists():
-                inc_path = alt
+            # migration fallback: components/header/*
+            if not inc_path.exists() and inc_str.startswith("components/"):
+                alt = (UI_DIR / "components" / "header" / Path(inc_str).name).resolve()
+                if alt.exists():
+                    inc_path = alt
 
-        try:
-            with open(inc_path, "r", encoding="utf-8") as f:
-                loaded = json.load(f)
-            return resolve_includes(loaded, base_dir=inc_path.parent)
-        except Exception:
-            return _missing_component_node(inc_value) if soft else (_ for _ in ()).throw(
-                RuntimeError(f"include failed: {inc_value}")
-            )
+            try:
+                loaded = _load_json(inc_path)
+                return resolve_includes(loaded, base_dir=inc_path.parent)
+            except Exception:
+                return _missing_component_node(spec) if soft else (_ for _ in ()).throw(
+                    RuntimeError(f"include failed: {spec}")
+                )
+
+        # Case 2: object include {path, patch?}
+        if isinstance(spec, dict):
+            path_str = spec.get("path")
+            if not isinstance(path_str, str):
+                return _missing_component_node(spec) if soft else (_ for _ in ()).throw(
+                    ValueError("$include object must contain 'path': str")
+                )
+
+            inc_str = path_str.lstrip("/")
+            if inc_str.startswith(("components/", "pages/")):
+                inc_path = _safe_join(UI_DIR, inc_str)
+            else:
+                inc_path = _safe_join(base_dir, inc_str)
+
+            # migration fallback: components/header/*
+            if not inc_path.exists() and inc_str.startswith("components/"):
+                alt = (UI_DIR / "components" / "header" / Path(inc_str).name).resolve()
+                if alt.exists():
+                    inc_path = alt
+
+            try:
+                loaded = _load_json(inc_path)
+                resolved = resolve_includes(loaded, base_dir=inc_path.parent)
+            except Exception:
+                return _missing_component_node(path_str) if soft else (_ for _ in ()).throw(
+                    RuntimeError(f"include failed: {path_str}")
+                )
+
+            # optional patch list: [{ "id": "...", "set": {...} }, ...]
+            patch_list = spec.get("patch") or []
+            if isinstance(patch_list, list):
+                for op in patch_list:
+                    if not isinstance(op, dict):
+                        continue
+                    tid = op.get("id")
+                    updates = op.get("set") or {}
+                    if not isinstance(updates, dict):
+                        continue
+
+                    applied = False
+                    if isinstance(tid, str) and tid:
+                        applied = patch_by_id(resolved, tid, updates)
+
+                    # Fallbacks:
+                    # - allow patching the root component when id is not provided or special
+                    # - or when the root looks like a state component (type == "state")
+                    if not applied and isinstance(resolved, dict):
+                        if tid in (None, "", "*", "root") or resolved.get("type") == "state":
+                            for k, v in updates.items():
+                                if k == "action" and v is None:
+                                    resolved.pop("action", None)
+                                else:
+                                    resolved[k] = v
+                            applied = True
+
+            # --- state handling on include ---
+            _sentinel = object()
+            req_sid = _sentinel
+            for key in (
+                "state_id", "state", "selected", "selected_id",
+                "initial_state_id", "initial_state", "initial",
+                "default", "value", "current",
+            ):
+                if key in spec:
+                    req_sid = spec[key]
+                    break
+
+            # wrapper policy: keep wrapper only if explicitly requested
+            keep_wrapper = bool(spec.get("keep_state") or spec.get("keep_wrapper"))
+            explicit_flatten = bool(spec.get("flatten_state") or spec.get("unwrap") or spec.get("inline"))
+            flatten = explicit_flatten or (req_sid is not _sentinel and not keep_wrapper)
+
+            if isinstance(resolved, dict) and resolved.get("type") == "state":
+                states = resolved.get("states")
+                if isinstance(states, list) and states:
+                    def _sid(s):
+                        return s.get("state_id") if isinstance(s, dict) else None
+                    def _eq(a, b):
+                        return (a is not None and b is not None and str(a) == str(b))
+
+                    # choose state: requested -> current -> first
+                    chosen = None
+                    if req_sid is not _sentinel:
+                        chosen = next((s for s in states if _eq(_sid(s), req_sid)), None)
+                    if chosen is None:
+                        cur = resolved.get("state_id")
+                        if cur is not None:
+                            chosen = next((s for s in states if _eq(_sid(s), cur)), None)
+                    if chosen is None:
+                        chosen = states[0] if isinstance(states[0], dict) else None
+
+                    # sync top-level state_id
+                    sid_val = _sid(chosen)
+                    if sid_val is not None:
+                        resolved["state_id"] = sid_val
+
+                    # move chosen first to please engines that rely on order
+                    try:
+                        idx = states.index(chosen)
+                        if idx > 0:
+                            states.insert(0, states.pop(idx))
+                    except Exception:
+                        pass
+
+                    # inline selected state's div when flatten is requested
+                    if flatten and isinstance(chosen, dict) and "div" in chosen:
+                        return resolve_includes(deepcopy(chosen["div"]), base_dir=inc_path.parent)
+
+            return resolved
+
+        # Unknown spec type
+        return _missing_component_node(spec) if soft else (_ for _ in ()).throw(
+            ValueError("$include must be string or object")
+        )
 
     if isinstance(node, dict):
-        if "$include" in node and isinstance(node["$include"], str):
-            return _resolve_one("$include", node["$include"])
-        if "$include_optional" in node and isinstance(node["$include_optional"], str):
-            return _resolve_one("$include_optional", node["$include_optional"])
+        if "$include" in node:
+            return _resolve_from_spec("$include", node["$include"])
+        if "$include_optional" in node:
+            return _resolve_from_spec("$include_optional", node["$include_optional"])
         return {k: resolve_includes(v, base_dir=base_dir) for k, v in node.items()}
+
     if isinstance(node, list):
         return [resolve_includes(x, base_dir=base_dir) for x in node]
+
     return node
 
 # ---------- helpers: patch/replace-by-id ----------
 
-def patch_by_id(tree: Any, target_id: str, updates: Dict[str, Any]) -> None:
+def patch_by_id(tree: Any, target_id: str, updates: Dict[str, Any]) -> bool:
+    applied = False
     if isinstance(tree, dict):
         if tree.get("id") == target_id:
             for k, v in updates.items():
@@ -119,11 +245,15 @@ def patch_by_id(tree: Any, target_id: str, updates: Dict[str, Any]) -> None:
                     tree.pop("action", None)
                 else:
                     tree[k] = v
+            applied = True
         for v in list(tree.values()):
-            patch_by_id(v, target_id, updates)
+            if patch_by_id(v, target_id, updates):
+                applied = True
     elif isinstance(tree, list):
         for item in tree:
-            patch_by_id(item, target_id, updates)
+            if patch_by_id(item, target_id, updates):
+                applied = True
+    return applied
 
 def replace_node_by_id(node: Any, node_id: str, replacement: Dict[str, Any]) -> bool:
     if isinstance(node, dict):

@@ -1,7 +1,7 @@
 {
     "type": "state",
     "id": "lesson_card_state",
-    "state_id": "1",
+    "state_id": "2",
     "states": [
         {
             "state_id": "0",
