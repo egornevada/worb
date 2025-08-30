@@ -62,6 +62,7 @@
                                                 }
                                             }
                                         },
+                                        
                                         {
                                             "$include": "/components/lesson_card.json"
                                         },
