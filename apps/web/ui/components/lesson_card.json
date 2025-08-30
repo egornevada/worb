@@ -17,9 +17,12 @@
                 "background": [
                     {
                         "type": "solid",
-                        "color": "@color.background"
+                        "color": "#f5f5f5"
                     }
                 ],
+                "border": {
+                    "corner_radius": 12
+                },
                 "paddings": {
                     "top": 12,
                     "right": 12,

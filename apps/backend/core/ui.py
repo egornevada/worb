@@ -303,7 +303,7 @@ def _lesson_item(title: str, lid: Optional[int], slug: Optional[str], *, state: 
     return {
         "type": "container",
         "width": {"type": "match_parent"},
-        "margins": {"bottom": 10},
+        "margins": {"top": 12, "bottom": 16},
         "action": {"log_id": "open_lesson", "url": path, "payload": payload},
         "items": [
             {
@@ -396,7 +396,11 @@ def build_home_tabs_from_strapi() -> Dict[str, Any]:
 
         items.append({
             "title": title,
-            "div": {"type": "container", "items": lesson_views},
+            "div": {
+                "type": "container",
+                "paddings": {"top": 12, "left": 16, "right": 16, "bottom": 24},
+                "items": lesson_views
+            },
         })
 
     if not items:
@@ -417,14 +421,29 @@ def build_home_tabs_from_strapi() -> Dict[str, Any]:
         "type": "tabs",
         "id": "home_tabs",
         "height": {"type": "wrap_content"},
-        "tab_title_style": {"animation_type": "slide"},
+        "has_separator": False,
+        # padding for the whole titles row
+        "title_paddings": {"left": 16, "right": 16, "top": 0, "bottom": 0},
+        # pill-style chips for titles
+        "tab_title_style": {
+            "animation_type": "slide",
+            "item_spacing": 8,
+            "corner_radius": 20,
+            "paddings": {"left": 14, "right": 14, "top": 6, "bottom": 6},
+            "font_size": 16,
+            "active_font_weight": "medium",
+            "inactive_font_weight": "regular",
+            "active_text_color": "#FFFFFF",
+            "inactive_text_color": "#808080",
+            "active_background_color": "#222222",
+            "inactive_background_color": "#00000000"
+        },
         "items": items,
     }
-    # Expand includes and resolve design tokens to hex so backgrounds render correctly
+    # Expand nested includes but keep token references (e.g. "@color.*")
+    # so DivKit can resolve them using the card-level `variables`.
     resolved = resolve_includes(deepcopy(tabs))
-    try:
-        theme = os.getenv("THEME", "light") or "light"
-    except Exception:
-        theme = "light"
-    resolved = apply_design_tokens(resolved, load_tokens(theme))
+    # Apply tokens to resolve @color.* references inside included components
+    tokens = load_tokens("light")
+    resolved = apply_design_tokens(resolved, tokens)
     return resolved
