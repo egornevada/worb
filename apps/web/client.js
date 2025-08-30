@@ -210,11 +210,53 @@
     return null;
   }
 
+  // Helper: detect home routes for graceful fallback
+  function isHomeView(viewPath) {
+    const qIndex = viewPath.indexOf('?');
+    const pathname = qIndex >= 0 ? viewPath.slice(0, qIndex) : viewPath;
+    return (
+      pathname === '/' ||
+      pathname === '/view' ||
+      pathname === '/view/' ||
+      pathname === '/view/home'
+    );
+  }
+
   async function fetchCard(viewPath) {
     const api = routeToApi(viewPath);
-    const json = await fetchCardWithCache(api);
-    render(json);
-
+    try {
+      const json = await fetchCardWithCache(api);
+      render(json);
+    } catch (e) {
+      console.error('fetchCard failed for', api, e);
+      // If API /home not available, try static UI page as a graceful fallback
+      if (isHomeView(viewPath)) {
+        try {
+          const json = await fetchCardWithCache('/ui/pages/home.json');
+          render(json);
+          return;
+        } catch (e2) {
+          console.error('home.json fallback failed', e2);
+        }
+      }
+      // Last resort: show a small placeholder instead of a blank screen
+      render({
+        card: {
+          log_id: 'error',
+          states: [{
+            state_id: 0,
+            div: {
+              type: 'text',
+              text: 'Не удалось загрузить страницу',
+              width: { type: 'match_parent' },
+              margins: { top: 24, left: 16, right: 16 }
+            }
+          }]
+        }
+      });
+      return;
+    }
+  
     // prefetch next step for lessons
     const nextView = nextViewUrl(viewPath);
     if (nextView) preloadViewUrl(nextView);
@@ -223,16 +265,21 @@
   function render(json) {
     currentJson = json;
     const DivKit = window.Ya && window.Ya.DivKit;
-    if (!DivKit) {
-      root.textContent = 'DivKit bundle не найден. Проверь подключение Ya.DivKit.';
-      console.error('DivKit not found at window.Ya.DivKit');
+    const mount = root || document.getElementById('root');
+    if (!DivKit || !mount) {
+      if (mount) {
+        mount.textContent = 'DivKit bundle не найден. Проверь подключение Ya.DivKit.';
+      } else {
+        console.error('Mount element #root not found');
+      }
+      if (!DivKit) console.error('DivKit not found at window.Ya.DivKit');
       return;
     }
 
     if (!div) {
       div = DivKit.render({
         id: 'demo',
-        target: root,
+        target: mount,
         json,
         onError: (e) => console.error('DivKit error:', e),
         onAction: handleAction,
@@ -374,8 +421,16 @@
   }
 
   // ------------------------------ bootstrap -------------------------------
-  const start = (location.pathname + (location.search || '')) || '/view/home';
-  fetchCard(start);
+  function boot() {
+    const start = (location.pathname + (location.search || '')) || '/view/home';
+    fetchCard(start);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', boot, { once: true });
+  } else {
+    boot();
+  }
 
   window.addEventListener('popstate', () => {
     fetchCard(location.pathname + (location.search || ''));
