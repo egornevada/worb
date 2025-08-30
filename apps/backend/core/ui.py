@@ -1,3 +1,4 @@
+# apps/backend/core/ui.py
 from __future__ import annotations
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -289,22 +290,35 @@ def lesson_deeplink(step: int, *, slug: Optional[str] = None, lesson_id: Optiona
         return f"/view/lesson/{lesson_id}?i={step}"
     return "/view/home"
 
-def _lesson_item(title: str, lid: Optional[int], slug: Optional[str]) -> Dict[str, Any]:
+def _lesson_item(title: str, lid: Optional[int], slug: Optional[str], *, state: str = "0") -> Dict[str, Any]:
+    """Карточка урока: визуал из components/lesson_card.json, данные из Strapi."""
     path = lesson_deeplink(0, slug=slug, lesson_id=lid)
     payload: Dict[str, Any] = {"path": path}
     if lid is not None:
         payload["id"] = int(lid)
     if slug:
         payload["slug"] = slug
+
+    # оборачиваем include в контейнер, чтобы сделать кликабельным всю карточку
     return {
-        "type": "text",
-        "text": title,
-        "paddings": {"top": 12, "bottom": 12, "left": 16, "right": 16},
-        "background": [{"type": "solid", "color": "#F3F3F3"}],
-        "border": {"corner_radius": 12},
+        "type": "container",
+        "width": {"type": "match_parent"},
         "margins": {"bottom": 10},
         "action": {"log_id": "open_lesson", "url": path, "payload": payload},
-        "text_alignment_horizontal": "left",
+        "items": [
+            {
+                "$include": {
+                    "path": "/components/lesson_card.json",
+                    "state_id": str(state),          # "0" | "1" | "2"
+                    "flatten_state": True,           # инлайн выбранного стейта
+                    "patch": [                       # подменяем заголовок во всех вариантах
+                        {"id": "lesson_title",          "set": {"text": title}},
+                        {"id": "lesson_title_brand",    "set": {"text": title}},
+                        {"id": "lesson_title_disabled", "set": {"text": title}},
+                    ],
+                }
+            }
+        ]
     }
 
 def build_home_tabs_from_strapi() -> Dict[str, Any]:
@@ -340,7 +354,37 @@ def build_home_tabs_from_strapi() -> Dict[str, Any]:
                 lid_int = int(lid) if lid is not None else None
             except Exception:
                 lid_int = None
-            lesson_views.append(_lesson_item(ltitle, lid_int, slug))
+
+            # читаем состояние (если нет — "0")
+            raw_state = (
+                la.get("state")
+                or la.get("ui_state")
+                or la.get("status")
+                or la.get("uiState")
+            )
+            state_map = {
+                "0": "0",
+                "1": "1",
+                "2": "2",
+                "brand": "1",
+                "success": "1",
+                "ready": "1",
+                "done": "1",
+                "completed": "1",
+                "disabled": "2",
+                "locked": "2",
+                "off": "2",
+            }
+            if isinstance(raw_state, bool):
+                state_val = "1" if raw_state else "0"
+            elif isinstance(raw_state, int):
+                state_val = "2" if raw_state == 2 else ("1" if raw_state == 1 else "0")
+            elif isinstance(raw_state, str):
+                state_val = state_map.get(raw_state.strip().lower(), raw_state.strip())
+            else:
+                state_val = "0"
+
+            lesson_views.append(_lesson_item(ltitle, lid_int, slug, state=state_val))
 
         if not lesson_views:
             lesson_views = [{
@@ -369,10 +413,18 @@ def build_home_tabs_from_strapi() -> Dict[str, Any]:
             },
         }]
 
-    return {
+    tabs = {
         "type": "tabs",
         "id": "home_tabs",
         "height": {"type": "wrap_content"},
         "tab_title_style": {"animation_type": "slide"},
         "items": items,
     }
+    # Expand includes and resolve design tokens to hex so backgrounds render correctly
+    resolved = resolve_includes(deepcopy(tabs))
+    try:
+        theme = os.getenv("THEME", "light") or "light"
+    except Exception:
+        theme = "light"
+    resolved = apply_design_tokens(resolved, load_tokens(theme))
+    return resolved
