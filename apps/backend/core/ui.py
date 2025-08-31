@@ -360,7 +360,7 @@ def build_home_tabs_from_strapi() -> Dict[str, Any]:
                 "type": "container",
                 "width": {"type": "match_parent"},
                 "aspect": {"ratio": 1},
-                "margins": {"left": 8, "right": 8, "bottom": 8},
+                "margins": {"left": 4, "right": 4, "bottom": 4,"top": 4},
                 "items": [card]
             })
 
@@ -370,10 +370,7 @@ def build_home_tabs_from_strapi() -> Dict[str, Any]:
             "width": {"type": "match_parent"},
             "height": {"type": "wrap_content"},
             "column_count": 2,
-            "column_spacing": 16,
-            "row_spacing": 16,
             # высоту ячейки задаём через aspect в самой ячейке, поэтому item_height не используем
-            "paddings": {"top": 12, "left": 16, "right": 16, "bottom": 24},
             "items": cells,
         }
 
