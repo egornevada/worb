@@ -5,15 +5,34 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>DivKit demo</title>
     <style>
-      html, body { margin:0; padding:0; height:100%; width:100%; font-family:-apple-system, system-ui; }
-      /* Give DivKit a concrete height so match_parent works */
-      #root { width:100%; max-width:640px; margin:0 auto; height: 100vh !important; }
+      /* Base page: allow natural scrolling; keep at least viewport height */
+      html, body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        font-family: -apple-system, system-ui;
+      }
+
+      /* DivKit mount – grows by content, but no less than the viewport */
+      #root {
+        width: 100%;
+        max-width: 640px;
+        margin: 0 auto;
+        min-height: 100vh;   /* was fixed height → blocked scrolling */
+        height: auto;
+      }
+
       /* Prefer dynamic viewport height when supported */
       @supports (height: 100dvh) {
-        #root { height: 100dvh !important; }
+        #root { min-height: 100dvh; }
       }
-      /* Make DivKit wrapper stretch and allow scrolling when content is taller */
-      #root > div { height: 100% !important; min-height: 100% !important; overflow: auto; }
+
+      /* Let DivKit internal wrapper size by content; avoid nested scrollbars */
+      #root > div {
+        min-height: inherit;
+        height: auto !important;
+        overflow: visible !important;
+      }
     </style>
   </head>
   <body>

@@ -71,43 +71,20 @@ def get_lesson(lesson_id: int):
         left_url,  right_url  = None, next_url
 
     patch_by_id(card, "word_term",  {"text": term})
-    patch_by_id(card, "word_image", {"image_url": image_url or "https://dummyimage.com/220x220/eeeeee/aaaaaa.png&text=img"})
+    patch_by_id(card, "word_image", {
+        "image_url": image_url or "https://dummyimage.com/600x600/eeeeee/aaaaaa.png?text=img",
+        # тянем картинку на всю доступную ширину/высоту секции со словами
+        "width":  {"type": "match_parent"},
+        "height": {"type": "match_parent"},
+        # вписываем изображение целиком без обрезания
+        "scale": "fit",
+        "content_mode": "scale_to_fit",
+    })
     patch_by_id(card, "choice_left_text",  {"text": left_text})
     patch_by_id(card, "choice_right_text", {"text": right_text})
 
     patch_by_id(card, "choice_left",  {"action": {"log_id": "next_word", "url": left_url} if left_url else None})
     patch_by_id(card, "choice_right", {"action": {"log_id": "next_word", "url": right_url} if right_url else None})
-
-    # --- enforce fullscreen layout and stretchy content ---
-    # 1) make the root page container fill the viewport
-    try:
-        root_div = (card.get("card") or {}).get("states", [{}])[0].get("div")
-        if isinstance(root_div, dict):
-            root_div["height"] = {"type": "match_parent"}
-            root_div.setdefault("width", {"type": "match_parent"})
-            root_div.setdefault("orientation", "vertical")
-    except Exception:
-        pass
-
-    # 2) ensure main content stretches; button stays wrap_content at the bottom
-    patch_by_id(card, "lesson_main", {
-        "height": {"type": "match_parent"},
-        "width": {"type": "match_parent"},
-        "weight": 1
-    })
-    patch_by_id(card, "lesson_footer", {"height": {"type": "wrap_content"}, "width": {"type": "match_parent"}})
-    patch_by_id(card, "lesson_check_button", {"height": {"type": "wrap_content"}, "width": {"type": "match_parent"}})
-
-    # 3) make the word image non-square and prevent cropping
-    #    - scale_to_fit => object-fit: contain
-    #    - width = match_parent, height = wrap_content so the image defines its own height
-    #    - drop any aspect/forced height that may have slipped in from includes
-    patch_by_id(card, "word_image", {
-        "content_mode": "scale_to_fit",
-        "width": {"type": "match_parent"},
-        "height": {"type": "wrap_content"},
-        "aspect": None
-    })
 
     return jsonify(card)
 
@@ -165,41 +142,16 @@ def get_lesson_by_slug_route(slug: str):
         left_url,  right_url  = None, next_url
 
     patch_by_id(card, "word_term",  {"text": term})
-    patch_by_id(card, "word_image", {"image_url": image_url or "https://dummyimage.com/220x220/eeeeee/aaaaaa.png&text=img"})
+    patch_by_id(card, "word_image", {
+        "image_url": image_url or "https://dummyimage.com/600x600/eeeeee/aaaaaa.png?text=img",
+        "width":  {"type": "match_parent"},
+        "height": {"type": "match_parent"},
+        "scale": "fit",
+        "content_mode": "scale_to_fit",
+    })
     patch_by_id(card, "choice_left_text",  {"text": left_text})
     patch_by_id(card, "choice_right_text", {"text": right_text})
     patch_by_id(card, "choice_left",  {"action": {"log_id": "next_word", "url": left_url} if left_url else None})
     patch_by_id(card, "choice_right", {"action": {"log_id": "next_word", "url": right_url} if right_url else None})
-
-    # --- enforce fullscreen layout and stretchy content ---
-    # 1) make the root page container fill the viewport
-    try:
-        root_div = (card.get("card") or {}).get("states", [{}])[0].get("div")
-        if isinstance(root_div, dict):
-            root_div["height"] = {"type": "match_parent"}
-            root_div.setdefault("width", {"type": "match_parent"})
-            root_div.setdefault("orientation", "vertical")
-    except Exception:
-        pass
-
-    # 2) ensure main content stretches; button stays wrap_content at the bottom
-    patch_by_id(card, "lesson_main", {
-        "height": {"type": "match_parent"},
-        "width": {"type": "match_parent"},
-        "weight": 1
-    })
-    patch_by_id(card, "lesson_footer", {"height": {"type": "wrap_content"}, "width": {"type": "match_parent"}})
-    patch_by_id(card, "lesson_check_button", {"height": {"type": "wrap_content"}, "width": {"type": "match_parent"}})
-
-    # 3) make the word image non-square and prevent cropping
-    #    - scale_to_fit => object-fit: contain
-    #    - width = match_parent, height = wrap_content so the image defines its own height
-    #    - drop any aspect/forced height that may have slipped in from includes
-    patch_by_id(card, "word_image", {
-        "content_mode": "scale_to_fit",
-        "width": {"type": "match_parent"},
-        "height": {"type": "wrap_content"},
-        "aspect": None
-    })
 
     return jsonify(card)

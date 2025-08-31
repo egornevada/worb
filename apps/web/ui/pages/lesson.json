@@ -24,8 +24,7 @@
               "id": "lesson_main",
               "orientation": "vertical",
               "width": { "type": "match_parent" },
-              "height": { "type": "wrap_content" },
-              "weight": 1,
+              "height": { "type": "match_parent" },
               "paddings": { "left": 16, "right": 16, "top": 8, "bottom": 8 },
               "items": [
                 {

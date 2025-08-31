@@ -5,6 +5,19 @@
 (function () {
   'use strict';
 
+  // --- safe deep clone (Safari/old browsers may lack structuredClone) ---
+  function deepClone(obj) {
+    try {
+      if (typeof structuredClone === 'function') return structuredClone(obj);
+    } catch (_) {}
+    try {
+      return JSON.parse(JSON.stringify(obj));
+    } catch (_) {
+      // last resort: return as-is (mutations will be unsafe)
+      return obj;
+    }
+  }
+
   const root = document.getElementById('root');
   let div = null;           // DivKit instance
   let currentJson = null;   // last rendered JSON (for fallback state change)
@@ -30,7 +43,7 @@
 
   function fetchCardWithCache(apiPath) {
     if (cardCache.has(apiPath)) {
-      return Promise.resolve(structuredClone(cardCache.get(apiPath)));
+      return Promise.resolve(deepClone(cardCache.get(apiPath)));
     }
     return fetch(apiPath, { headers: { Accept: 'application/json' } })
       .then((res) => {
@@ -44,7 +57,7 @@
         }
         cardCache.set(apiPath, json);
         prewarmImagesFromCard(json);
-        return structuredClone(json);
+        return deepClone(json);
       });
   }
 
@@ -59,8 +72,8 @@
           const firstKey = cardCache.keys().next().value;
           cardCache.delete(firstKey);
         }
-        cardCache.set(api, json);
         prewarmImagesFromCard(json);
+        cardCache.set(api, deepClone(json));
       })
       .catch(() => {});
   }
@@ -294,7 +307,7 @@
   function setStateInJson(targetId, stateId) {
     try {
       if (!currentJson) return false;
-      const clone = structuredClone(currentJson);
+      const clone = deepClone(currentJson);
       let found = false;
       (function walk(n) {
         if (!n || typeof n !== 'object') return;
@@ -418,6 +431,9 @@
     if (!isLesson) cardCache.clear();
 
     await fetchCard(viewUrl);
+
+    // ensure we start at the top after navigation
+    try { window.requestAnimationFrame(() => window.scrollTo(0, 0)); } catch (_) { window.scrollTo(0, 0); }
   }
 
   // ------------------------------ bootstrap -------------------------------
