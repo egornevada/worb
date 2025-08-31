@@ -1,22 +1,28 @@
 {
   "type": "container",
+  "id": "progress_bar",
   "orientation": "horizontal",
-  "width":  { "type": "match_parent" },
-  "height": { "type": "fixed", "value": 12 },
+  "width": { "type": "match_parent" },
+  "height": { "type": "fixed", "value": 8 },
   "margins": { "top": 0, "right": 16, "bottom": 0, "left": 16 },
-  "border": { "corner_radius": 6 },
+  "border": { "corner_radius": 4 },
+  "clip_to_bounds": true,
+  "background": [ { "type": "solid", "color": "#E5E7EB" } ],
   "items": [
     {
       "type": "container",
+      "id": "progress_done",
+      "width": { "type": "match_parent" },
       "height": { "type": "match_parent" },
-      "weight": "@{correct}",
+      "weight": 0,
       "background": [ { "type": "solid", "color": "#46B100" } ]
     },
     {
       "type": "container",
+      "id": "progress_rest",
+      "width": { "type": "match_parent" },
       "height": { "type": "match_parent" },
-      "weight": "@{max(total - correct, 0)}",
-      "background": [ { "type": "solid", "color": "#eeeeee" } ]
+      "weight": 10
     }
   ]
 }

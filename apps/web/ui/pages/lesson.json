@@ -9,6 +9,10 @@
           "orientation": "vertical",
           "width": { "type": "match_parent" },
           "height": { "type": "match_parent" },
+          "variables": [
+            { "name": "progress_done_weight", "type": "number", "default_value": 0 },
+            { "name": "progress_rest_weight", "type": "number", "default_value": 10 }
+          ],
           "paddings": { "top": 16, "bottom": 24 },
           "items": [
             {
@@ -16,7 +20,15 @@
               "width": { "type": "match_parent" },
               "height": { "type": "wrap_content" },
               "items": [
-                { "$include": "/components/header_lesson.json" }
+                {
+                  "$include": {
+                    "path": "/components/header_lesson.json",
+                    "patch": [
+                      { "id": "progress_done", "set": { "weight": "@{progress_done_weight}" } },
+                      { "id": "progress_rest", "set": { "weight": "@{progress_rest_weight}" } }
+                    ]
+                  }
+                }
               ]
             },
             {
