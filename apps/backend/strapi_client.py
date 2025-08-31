@@ -70,7 +70,7 @@ def get_lesson(lesson_id: int) -> Dict[str, Any]:
         "fields[1]": "slug",
 
         "populate[cover]": "true",
-        "populate[category]": "true",
+        "populate[categories]": "true",
 
         "populate[words][fields][0]": "term",
         "populate[words][fields][1]": "translation",
@@ -94,7 +94,7 @@ def get_lesson_by_slug(slug: str) -> Optional[Dict[str, Any]]:
         "fields[1]": "slug",
 
         "populate[cover]": "true",
-        "populate[category]": "true",
+        "populate[categories]": "true",
 
         "populate[words][fields][0]": "term",
         "populate[words][fields][1]": "translation",
@@ -116,14 +116,27 @@ def to_divkit_lesson(lesson_entry: Dict[str, Any]) -> Dict[str, Any]:
 
     cover_url = _media_url(attrs.get("cover"))
 
-    cat_node = attrs.get("category")
-    cat_attrs = _attrs(cat_node) if cat_node else {}
-    category = {
-        "title": (cat_attrs.get("title") or "").strip() if isinstance(cat_attrs, dict) else "",
-        "slug": (cat_attrs.get("slug") or "").strip() if isinstance(cat_attrs, dict) else "",
-        "order": cat_attrs.get("order") if isinstance(cat_attrs, dict) else 0,
-        "icon_url": _media_url(cat_attrs.get("icon")) if isinstance(cat_attrs, dict) else "",
-    }
+    # categories: support both new many-to-many ("categories") and old single ("category")
+    cat_rel = attrs.get("categories") or attrs.get("category")
+    cat_nodes = []
+    if isinstance(cat_rel, list):
+        cat_nodes = cat_rel
+    elif isinstance(cat_rel, dict):
+        data = cat_rel.get("data")
+        if isinstance(data, list):
+            cat_nodes = data
+        elif isinstance(data, dict):
+            cat_nodes = [data]
+
+    categories: List[Dict[str, Any]] = []
+    for cn in cat_nodes:
+        ca = _attrs(cn)
+        categories.append({
+            "title": (ca.get("title") or "").strip(),
+            "slug": (ca.get("slug") or "").strip(),
+            "order": ca.get("order") or 0,
+            "icon_url": _media_url(ca.get("icon")),
+        })
 
     # words
     words_rel = attrs.get("words") or {}
@@ -150,7 +163,8 @@ def to_divkit_lesson(lesson_entry: Dict[str, Any]) -> Dict[str, Any]:
         "title": (attrs.get("title") or "").strip(),
         "slug": (attrs.get("slug") or "").strip(),
         "cover_url": cover_url,
-        "category": category,
+        "category": categories[0] if categories else {},  # backward compatibility
+        "categories": categories,
         "words": words,
     }
 

@@ -8,6 +8,7 @@
           "type": "container",
           "orientation": "vertical",
           "width": { "type": "match_parent" },
+          "height": { "type": "match_parent" },
           "paddings": { "top": 16, "bottom": 24 },
           "items": [
             {
@@ -20,17 +21,44 @@
             },
             {
               "type": "container",
+              "id": "lesson_main",
+              "orientation": "vertical",
               "width": { "type": "match_parent" },
               "height": { "type": "wrap_content" },
+              "weight": 1,
+              "paddings": { "left": 16, "right": 16, "top": 8, "bottom": 8 },
               "items": [
-                { "$include": "/components/lesson_word.json" }
-              ]
-            },
-            {
-              "type": "container",
-              "width": { "type": "match_parent" },
-              "height": { "type": "wrap_content" },
-              "items": [
+                {
+                  "$include": {
+                    "path": "/components/lesson_word.json",
+                    "patch": [
+                      {
+                        "id": "lesson_image",
+                        "set": {
+                          "content_mode": "scale_to_fit",
+                          "width": { "type": "match_parent" },
+                          "height": { "type": "match_parent" }
+                        }
+                      },
+                      {
+                        "id": "word_image",
+                        "set": {
+                          "content_mode": "scale_to_fit",
+                          "width": { "type": "match_parent" },
+                          "height": { "type": "match_parent" }
+                        }
+                      },
+                      {
+                        "id": "picture",
+                        "set": {
+                          "content_mode": "scale_to_fit",
+                          "width": { "type": "match_parent" },
+                          "height": { "type": "match_parent" }
+                        }
+                      }
+                    ]
+                  }
+                },
                 { "$include": "/components/lesson_buttons.json" }
               ]
             },

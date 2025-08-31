@@ -35,9 +35,9 @@
     },
     "lessons": {
       "type": "relation",
-      "relation": "oneToMany",
+      "relation": "manyToMany",
       "target": "api::lesson.lesson",
-      "mappedBy": "category"
+      "mappedBy": "categories"
     }
   }
 }

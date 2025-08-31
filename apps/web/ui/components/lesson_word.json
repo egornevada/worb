@@ -1,11 +1,23 @@
 {
   "type": "container",
   "variables": [
-    { "name": "term", "type": "string", "default_value": "Заголовок" },
-    { "name": "image_url", "type": "string", "default_value": "https://dummyimage.com/220x220/eeeeee/aaaaaa.png&text=img" }
+    {
+      "name": "term",
+      "type": "string",
+      "default_value": "Заголовок"
+    },
+    {
+      "name": "image_url",
+      "type": "string",
+      "default_value": "https://dummyimage.com/220x220/eeeeee/aaaaaa.png&text=img"
+    }
   ],
-  "width": { "type": "match_parent" },
-  "height": { "type": "match_parent" },
+  "width": {
+    "type": "match_parent"
+  },
+  "height": {
+    "type": "match_parent"
+  },
   "alignment_horizontal": "center",
   "alignment_vertical": "center",
   "items": [
@@ -13,26 +25,42 @@
       "type": "image",
       "id": "word_image",
       "image_url_variable": "image_url",
-      "width": { "type": "fixed", "value": 220 },
-      "height": { "type": "fixed", "value": 220 },
+      "width": {
+        "type": "match_parent"
+      },
+      "height": {
+        "type": "wrap_content"
+      },
       "content_mode": "scale_to_fit",
       "preload_required": true,
       "alignment_horizontal": "center",
       "alignment_vertical": "center",
-      "margins": { "bottom": 16 }
+      "margins": {
+        "bottom": 16
+      }
     },
     {
       "type": "text",
       "id": "word_term",
       "text_variable": "term",
-      "width": { "type": "match_parent" },
+      "width": {
+        "type": "match_parent"
+      },
       "text_alignment_horizontal": "center",
       "font_size": 24,
       "line_height": 28,
-      "margins": { "top": 8, "bottom": 8 }
+      "margins": {
+        "top": 8,
+        "bottom": 8
+      }
     }
   ],
-  "paddings": { "top": 8, "right": 8, "bottom": 8, "left": 8 },
+  "paddings": {
+    "top": 8,
+    "right": 8,
+    "bottom": 8,
+    "left": 8
+  },
   "content_alignment_horizontal": "center",
   "content_alignment_vertical": "center"
 }

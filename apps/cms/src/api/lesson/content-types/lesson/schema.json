@@ -35,9 +35,9 @@
       "target": "api::word.word",
       "mappedBy": "lesson"
     },
-    "category": {
+    "categories": {
       "type": "relation",
-      "relation": "manyToOne",
+      "relation": "manyToMany",
       "target": "api::category.category",
       "inversedBy": "lessons"
     }
