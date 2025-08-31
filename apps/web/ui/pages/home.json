@@ -73,58 +73,7 @@
                     "left": 8
                   }
                 },
-                {
-                  "type": "container",
-                  "width": {
-                    "type": "match_parent"
-                  },
-                  "paddings": {
-                    "top": 8,
-                    "left": 16,
-                    "right": 16
-                  },
-                  "items": [
-                    {
-                      "type": "container",
-                      "width": {
-                        "type": "match_parent"
-                      },
-                      "height": {
-                        "type": "fixed",
-                        "value": 44
-                      },
-                      "background": [
-                        {
-                          "type": "solid",
-                          "color": "#1a73e8"
-                        }
-                      ],
-                      "border": {
-                        "corner_radius": 12
-                      },
-                      "items": [
-                        {
-                          "type": "text",
-                          "text": "Начать",
-                          "width": {
-                            "type": "match_parent"
-                          },
-                          "height": {
-                            "type": "match_parent"
-                          },
-                          "text_alignment_horizontal": "center",
-                          "text_alignment_vertical": "center",
-                          "text_color": "#FFFFFF",
-                          "font_size": 16
-                        }
-                      ],
-                      "action": {
-                        "log_id": "start_lesson",
-                        "url": "/view/lesson/2?i=0"
-                      }
-                    }
-                  ]
-                },
+                
                 {
                   "type": "container",
                   "width": {
@@ -140,9 +89,7 @@
                   ],
                   "paddings": {
                     "top": 8,
-                    "right": 8,
-                    "bottom": 8,
-                    "left": 8
+                    "bottom": 8
                   }
                 }
               ]

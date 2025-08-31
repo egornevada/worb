@@ -1,0 +1,12 @@
+{
+  "type": "grid",
+  "id": "category_grid",
+  "width": { "type": "match_parent" },
+  "paddings": { "top": 12, "left": 16, "right": 16, "bottom": 24 },
+
+  "column_count": 2,        
+  "column_spacing": 16,      
+  "row_spacing": 16,       
+
+  "item_height": { "type": "ratio", "value": 1 }
+}

@@ -2,20 +2,47 @@
   "type": "tabs",
   "id": "home_tabs",
   "height": { "type": "wrap_content" },
-  "tab_title_style": { "animation_type": "slide" },
+  "has_separator": false,
+  "title_paddings": { "left": 16, "right": 16, "top": 0, "bottom": 0 },
+  "tab_title_style": {
+    "animation_type": "slide",
+    "item_spacing": 8,
+    "corner_radius": 20,
+    "paddings": { "left": 14, "right": 14, "top": 6, "bottom": 6 },
+    "font_size": 16,
+    "active_font_weight": "medium",
+    "inactive_font_weight": "regular",
+    "active_text_color": "#FFFFFF",
+    "inactive_text_color": "#808080",
+    "active_background_color": "#222222",
+    "inactive_background_color": "#00000000"
+  },
   "items": [
     {
-      "title": "Загрузка…",
+      "title": "Самые обычные слова",
       "div": {
-        "type": "tab_container",
-        "items": [
-          {
-            "type": "text",
-            "text": "Загрузка категорий…",
-            "text_alignment_horizontal": "center",
-            "paddings": { "top": 24, "bottom": 24 }
-          }
-        ]
+        "type": "grid",
+        "id": "grid_common",
+        "width": { "type": "match_parent" },
+        "paddings": { "top": 8, "left": 16, "right": 16, "bottom": 16 },
+        "column_count": 2,
+        "column_spacing": 12,
+        "row_spacing": 12,
+        "item_height": { "type": "ratio", "value": 1 },
+        "items": []
+      }
+    },
+    {
+      "title": "Профильные темы",
+      "div": {
+        "type": "grid",
+        "id": "grid_profile",
+        "width": { "type": "match_parent" },
+        "column_count": 2,
+        "column_spacing": 12,
+        "row_spacing": 12,
+        "item_height": { "type": "ratio", "value": 1 },
+        "items": []
       }
     }
   ]

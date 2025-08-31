@@ -11,8 +11,7 @@
                     "type": "match_parent"
                 },
                 "height": {
-                    "type": "fixed",
-                    "value": 168
+                    "type": "match_parent"
                 },
                 "background": [
                     {
@@ -103,8 +102,7 @@
                     "type": "match_parent"
                 },
                 "height": {
-                    "type": "fixed",
-                    "value": 168
+                    "type": "match_parent"
                 },
                 "background": [
                     {
@@ -192,8 +190,7 @@
                     "type": "match_parent"
                 },
                 "height": {
-                    "type": "fixed",
-                    "value": 168
+                    "type": "match_parent"
                 },
                 "background": [
                     {

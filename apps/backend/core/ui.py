@@ -212,9 +212,26 @@ def resolve_includes(node: Any, *, base_dir: Optional[Path] = None) -> Any:
                     except Exception:
                         pass
 
+                    # --- Support div patching and aspect/square hints when flattening ---
+                    div_patch = spec.get("patch_div") or spec.get("div_set") or {}
+                    if not isinstance(div_patch, dict):
+                        div_patch = {}
+                    aspect_ratio = spec.get("aspect_ratio")
+                    make_square = bool(spec.get("square") or spec.get("enforce_square"))
+                    if make_square and aspect_ratio is None:
+                        aspect_ratio = 1
+
                     # inline selected state's div when flatten is requested
                     if flatten and isinstance(chosen, dict) and "div" in chosen:
-                        return resolve_includes(deepcopy(chosen["div"]), base_dir=inc_path.parent)
+                        from copy import deepcopy
+                        div_node = deepcopy(chosen["div"])
+                        # Apply patch to div_node
+                        for k, v in div_patch.items():
+                            div_node[k] = v
+                        # Apply aspect if given
+                        if aspect_ratio is not None:
+                            div_node["aspect"] = {"ratio": float(aspect_ratio)}
+                        return resolve_includes(div_node, base_dir=inc_path.parent)
 
             return resolved
 
@@ -291,7 +308,10 @@ def lesson_deeplink(step: int, *, slug: Optional[str] = None, lesson_id: Optiona
     return "/view/home"
 
 def _lesson_item(title: str, lid: Optional[int], slug: Optional[str], *, state: str = "0") -> Dict[str, Any]:
-    """Карточка урока: визуал из components/lesson_card.json, данные из Strapi."""
+    """Карточка урока: визуал из components/lesson_card.json, данные из Strapi.
+    Возвращаем уже РЕЗОЛВНУТЫЙ div выбранного состояния (flatten_state), без внешней обёртки,
+    чтобы в финальном ответе не оставалось узлов `$include` (DivKit их не понимает).
+    """
     path = lesson_deeplink(0, slug=slug, lesson_id=lid)
     payload: Dict[str, Any] = {"path": path}
     if lid is not None:
@@ -299,32 +319,63 @@ def _lesson_item(title: str, lid: Optional[int], slug: Optional[str], *, state: 
     if slug:
         payload["slug"] = slug
 
-    # оборачиваем include в контейнер, чтобы сделать кликабельным всю карточку
-    return {
-        "type": "container",
-        "width": {"type": "match_parent"},
-        "margins": {"top": 12, "bottom": 16},
-        "action": {"log_id": "open_lesson", "url": path, "payload": payload},
-        "items": [
-            {
-                "$include": {
-                    "path": "/components/lesson_card.json",
-                    "state_id": str(state),          # "0" | "1" | "2"
-                    "flatten_state": True,           # инлайн выбранного стейта
-                    "patch": [                       # подменяем заголовок во всех вариантах
-                        {"id": "lesson_title",          "set": {"text": title}},
-                        {"id": "lesson_title_brand",    "set": {"text": title}},
-                        {"id": "lesson_title_disabled", "set": {"text": title}},
-                    ],
-                }
-            }
-        ]
+    # Готовим include-спеку для карточки и РЕШАЕМ её прямо здесь,
+    # чтобы наружу вернуть чистый div без $include.
+    include_spec = {
+        "$include": {
+            "path": "/components/lesson_card.json",
+            "state_id": str(state),           # "0" | "1" | "2"
+            "flatten_state": True,            # инлайн выбранного стейта
+            # подменяем заголовки во всех вариантах
+            "patch": [
+                {"id": "lesson_title",           "set": {"text": title}},
+                {"id": "lesson_title_brand",     "set": {"text": title}},
+                {"id": "lesson_title_disabled",  "set": {"text": title}},
+            ],
+            # только клик на корневой div включённого state-а
+            "div_set": {
+                "action": {"log_id": "open_lesson", "url": path, "payload": payload},
+                "width":  {"type": "match_parent"},
+                "height": {"type": "match_parent"},
+            },
+        }
     }
+
+    # База для относительного пути — папка `components`
+    resolved = resolve_includes(include_spec, base_dir=UI_DIR / "components")
+    # resolve_includes вернёт сам div (благодаря flatten_state). Нам нужно вернуть ровно его.
+    return resolved
 
 def build_home_tabs_from_strapi() -> Dict[str, Any]:
     raw = get_categories()
     data = raw.get("data") if isinstance(raw, dict) else raw
     categories = data or []
+
+    def _grid_with_cards(cards: List[Dict[str, Any]]) -> Dict[str, Any]:
+        # Каждую карточку заворачиваем в квадратную ячейку, чтобы не было конфликта
+        # wrap_content (у грида) vs match_parent (у карточки).
+        cells: List[Dict[str, Any]] = []
+        for card in cards:
+            cells.append({
+                "type": "container",
+                "width": {"type": "match_parent"},
+                "aspect": {"ratio": 1},
+                "margins": {"left": 8, "right": 8, "bottom": 8},
+                "items": [card]
+            })
+
+        return {
+            "type": "grid",
+            "id": "category_grid",
+            "width": {"type": "match_parent"},
+            "height": {"type": "wrap_content"},
+            "column_count": 2,
+            "column_spacing": 16,
+            "row_spacing": 16,
+            # высоту ячейки задаём через aspect в самой ячейке, поэтому item_height не используем
+            "paddings": {"top": 12, "left": 16, "right": 16, "bottom": 24},
+            "items": cells,
+        }
 
     items: List[Dict[str, Any]] = []
     for cat in categories:
@@ -355,7 +406,6 @@ def build_home_tabs_from_strapi() -> Dict[str, Any]:
             except Exception:
                 lid_int = None
 
-            # читаем состояние (если нет — "0")
             raw_state = (
                 la.get("state")
                 or la.get("ui_state")
@@ -363,17 +413,9 @@ def build_home_tabs_from_strapi() -> Dict[str, Any]:
                 or la.get("uiState")
             )
             state_map = {
-                "0": "0",
-                "1": "1",
-                "2": "2",
-                "brand": "1",
-                "success": "1",
-                "ready": "1",
-                "done": "1",
-                "completed": "1",
-                "disabled": "2",
-                "locked": "2",
-                "off": "2",
+                "0": "0", "1": "1", "2": "2",
+                "brand": "1", "success": "1", "ready": "1", "done": "1", "completed": "1",
+                "disabled": "2", "locked": "2", "off": "2",
             }
             if isinstance(raw_state, bool):
                 state_val = "1" if raw_state else "0"
@@ -387,20 +429,22 @@ def build_home_tabs_from_strapi() -> Dict[str, Any]:
             lesson_views.append(_lesson_item(ltitle, lid_int, slug, state=state_val))
 
         if not lesson_views:
-            lesson_views = [{
-                "type": "text",
-                "text": "Пока нет уроков",
-                "paddings": {"top": 16, "bottom": 16},
-                "text_alignment_horizontal": "center",
-            }]
+            # Пустая категория — дружелюбный плейсхолдер
+            tab_div = {
+                "type": "container",
+                "items": [{
+                    "type": "text",
+                    "text": "Пока нет уроков",
+                    "paddings": {"top": 16, "bottom": 16},
+                    "text_alignment_horizontal": "center",
+                }],
+            }
+        else:
+            tab_div = _grid_with_cards(lesson_views)
 
         items.append({
             "title": title,
-            "div": {
-                "type": "container",
-                "paddings": {"top": 12, "left": 16, "right": 16, "bottom": 24},
-                "items": lesson_views
-            },
+            "div": tab_div,
         })
 
     if not items:
@@ -422,9 +466,7 @@ def build_home_tabs_from_strapi() -> Dict[str, Any]:
         "id": "home_tabs",
         "height": {"type": "wrap_content"},
         "has_separator": False,
-        # padding for the whole titles row
         "title_paddings": {"left": 16, "right": 16, "top": 0, "bottom": 0},
-        # pill-style chips for titles
         "tab_title_style": {
             "animation_type": "slide",
             "item_spacing": 8,
@@ -440,10 +482,45 @@ def build_home_tabs_from_strapi() -> Dict[str, Any]:
         },
         "items": items,
     }
-    # Expand nested includes but keep token references (e.g. "@color.*")
-    # so DivKit can resolve them using the card-level `variables`.
+
     resolved = resolve_includes(deepcopy(tabs))
-    # Apply tokens to resolve @color.* references inside included components
     tokens = load_tokens("light")
     resolved = apply_design_tokens(resolved, tokens)
     return resolved
+
+
+def inject_home_lessons_tabs(card_tree: Dict[str, Any]) -> Dict[str, Any]:
+    """Заменяет placeholder-узел с id `home_tabs` на реально собранные табы
+    с сеткой уроков из Strapi. Если узла с таким id нет, заменяет первый
+    встретившийся узел `type == "tabs"`.
+
+    Вызывай эту функцию в обработчике /view/home после resolve_includes.
+    """
+    try:
+        tabs = build_home_tabs_from_strapi()
+    except Exception:
+        # В случае проблем со Strapi — ничего не ломаем, просто возвращаем как есть
+        return card_tree
+
+    # 1) Пытаемся заменить по id
+    if replace_node_by_id(card_tree, "home_tabs", tabs):
+        return card_tree
+
+    # 2) Фолбэк: найти первый узел type == 'tabs' и заменить его
+    def _replace_first_tabs(node: Any) -> bool:
+        if isinstance(node, dict):
+            if node.get("type") == "tabs":
+                node.clear()
+                node.update(tabs)
+                return True
+            for v in list(node.values()):
+                if _replace_first_tabs(v):
+                    return True
+        elif isinstance(node, list):
+            for i in range(len(node)):
+                if _replace_first_tabs(node[i]):
+                    return True
+        return False
+
+    _replace_first_tabs(card_tree)
+    return card_tree
